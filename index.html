@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Encontre seu Lar Ideal</title>
+    <style>
+        :root {
+            /* Button States */
+            --button-top: -100px; /* Posição inicial fora da tela */
+            --button-visible-top: 24px; /* Posição quando visível */
+            /* Core colors - using deep blue for trust and gold for luxury */
+            --primary: #1a365d;
+            --primary-light: #2a4a7f;
+            --accent: #c5a572;
+            --accent-light: #d4b98c;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --text: #1a202c;
+            --text-light: #4a5568;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--surface);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .main-content {
+            padding: 64px 0;
+        }
+
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .hero-text {
+            max-width: 540px;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            color: var(--primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-light);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .lifestyle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 64px;
+        }
+
+        .lifestyle-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .lifestyle-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(26, 54, 93, 0.12);
+            border-color: var(--accent);
+        }
+
+        .lifestyle-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .lifestyle-content {
+            padding: 24px;
+        }
+
+        .lifestyle-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lifestyle-description {
+            color: var(--text-light);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 48px;
+            background: var(--surface-alt);
+            border-radius: 16px;
+            margin-bottom: 64px;
+        }
+
+        .cta-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .benefit-item {
+            text-align: left;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .benefit-icon {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .benefit-content h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .benefit-content p {
+            font-size: 0.9375rem;
+            color: var(--text-light);
+        }
+
+        .progress-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 16px 0;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profiles-button {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+        }
+
+        .profiles-button:hover {
+            background: var(--primary-light);
+        }
+
+        .profiles-button.visible {
+            display: inline-block;
+        }
+
+        .profiles-button:not(.visible) {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .profiles-button {
+                padding: 8px 12px;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <h1 class="logo">Modulari</h1>
+            <button id="profilesButton" class="profiles-button" onclick="window.location.href='profiles.html'">
+                Meus Perfis
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        <section class="hero-section">
+            <div class="hero-text">
+                <h2 class="hero-title">Descubra o imóvel que combina com seu estilo de vida</h2>
+                <p class="hero-subtitle">Nossa tecnologia analisa suas preferências para encontrar as melhores opções que se adequam ao seu perfil e necessidades.</p>
+            </div>
+            <div class="cta-section">
+                <h3 class="cta-title">Como você imagina seu espaço ideal?</h3>
+                <p>Selecione o estilo que mais combina com você</p>
+            </div>
+        </section>
+
+        <div class="lifestyle-grid">
+            <div class="lifestyle-card" onclick="selectLifestyle('beach')">
+                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" alt="Vida na Praia" class="lifestyle-image">
+                <div class="lifestyle-content">
+                    <h3 class="lifestyle-title">
+                        <span>🌊</span>
+                        Vida Litorânea
+                    </h3>
+                    <p class="lifestyle-description">Desperte com a brisa do mar e viva momentos de tranquilidade à beira-mar.</p>
+                </div>
+            </div>
+
+            <div class="lifestyle-card" onclick="selectLifestyle('city')">
+                <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80" alt="Vida Urbana" class="lifestyle-image">
+                <div class="lifestyle-content">
+                    <h3 class="lifestyle-title">
+                        <span>🌆</span>
+                        Centro Urbano
+                    </h3>
+                    <p class="lifestyle-description">Conectado com a energia da cidade e todas as facilidades urbanas.</p>
+                </div>
+            </div>
+
+            <div class="lifestyle-card" onclick="selectLifestyle('countryside')">
+                <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80" alt="Vida no Campo" class="lifestyle-image">
+                <div class="lifestyle-content">
+                    <h3 class="lifestyle-title">
+                        <span>🌳</span>
+                        Refúgio Natural
+                    </h3>
+                    <p class="lifestyle-description">Encontre paz e qualidade de vida em meio à natureza.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <div class="benefit-icon">🎯</div>
+                <div class="benefit-content">
+                    <h3>Match Inteligente</h3>
+                    <p>Análise personalizada baseada em suas preferências e estilo de vida.</p>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">⚡</div>
+                <div class="benefit-content">
+                    <h3>Processo Eficiente</h3>
+                    <p>Encontre seu imóvel ideal de forma rápida e assertiva.</p>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">💎</div>
+                <div class="benefit-content">
+                    <h3>Opções Premium</h3>
+                    <p>Acesso a um portfólio selecionado de imóveis de alto padrão.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="progress-footer">
+        <div class="container progress-container">
+            <div class="progress-item">
+                <span>🎯</span>
+                <span>Nível 1</span>
+            </div>
+            <div class="progress-item">
+                <span>🗺️</span>
+                <span>Início da jornada</span>
+            </div>
+            <div class="progress-item">
+                <span>⭐</span>
+                <span>Descobrindo seu estilo</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Função para verificar se existem perfis salvos
+        function checkSavedProfiles() {
+            const profilesButton = document.getElementById('profilesButton');
+            
+            try {
+                // Tenta obter e parsear os perfis salvos
+                const savedProfiles = localStorage.getItem('buyerProfiles');
+                if (!savedProfiles) {
+                    profilesButton.classList.remove('visible');
+                    return;
+                }
+
+                const profiles = JSON.parse(savedProfiles);
+                
+                // Verifica se há perfis válidos
+                if (Array.isArray(profiles) && profiles.length > 0) {
+                    profilesButton.classList.add('visible');
+                } else {
+                    profilesButton.classList.remove('visible');
+                }
+            } catch (error) {
+                console.error('Erro ao verificar perfis:', error);
+                profilesButton.classList.remove('visible');
+            }
+        }
+
+        // Função para selecionar estilo de vida
+        function selectLifestyle(lifestyle) {
+            localStorage.setItem('selectedLifestyle', lifestyle);
+            window.location.href = 'discovery.html';
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verifica perfis ao carregar a página
+            checkSavedProfiles();
+
+            // Monitora mudanças no localStorage
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'buyerProfiles') {
+                    checkSavedProfiles();
+                }
+            });
+        });
+
+        // Verificar novamente quando a janela receber foco
+        window.addEventListener('focus', checkSavedProfiles);
+    </script>
+</body>
+</html>

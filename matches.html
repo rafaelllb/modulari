@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Seus Matches</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        /* Page specific styles */
+        .matches-summary {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .stat-card {
+            padding: var(--spacing-sm);
+            background: var(--surface-alt);
+            border-radius: var(--radius-md);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .property-card {
+            position: relative;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .match-badge {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background: var(--primary);
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .property-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .property-content {
+            padding: var(--spacing-md);
+        }
+
+        .property-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin: var(--spacing-sm) 0;
+        }
+
+        .feature-tag {
+            background: var(--surface-alt);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">Modulari</h1>
+            <div class="header-actions">
+                <button class="button secondary-button" onclick="window.location.href='property-cards.html'">
+                    Continuar buscando
+                </button>
+                <button class="button primary-button" onclick="showScheduleModal()">
+                    Agendar visitas
+                </button>
+            </div>
+        </header>
+
+        <div class="matches-summary">
+            <h2 class="summary-title">Seus Matches</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-matches">0</div>
+                    <div class="stat-label">Matches encontrados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="match-score">0%</div>
+                    <div class="stat-label">Match médio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="price-range">R$ 0</div>
+                    <div class="stat-label">Faixa de preço média</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="matches-grid" class="matches-grid">
+            <!-- Os matches serão inseridos aqui via JavaScript -->
+        </div>
+
+		<div class="alternative-search">
+			<p>Não encontrou o que procurava?</p>
+			<button class="button primary-button" onclick="window.location.href='traditional-search.html'">
+				Buscar de forma tradicional
+			</button>
+		</div>
+    </div>
+
+    <script>
+        // Recuperar matches do localStorage
+        const matches = JSON.parse(localStorage.getItem('matches')) || [];
+
+        function updateStats() {
+            const totalMatches = matches.length;
+            const averageMatch = matches.reduce((acc, curr) => acc + curr.match, 0) / totalMatches;
+            const averagePrice = matches.reduce((acc, curr) => {
+                const price = parseInt(curr.price.replace(/\D/g, ''));
+                return acc + price;
+            }, 0) / totalMatches;
+
+            document.getElementById('total-matches').textContent = totalMatches;
+            document.getElementById('match-score').textContent = `${Math.round(averageMatch)}%`;
+            document.getElementById('price-range').textContent = 
+                `R$ ${(averagePrice).toLocaleString('pt-BR')}`;
+        }
+
+        function renderMatches() {
+            const matchesGrid = document.getElementById('matches-grid');
+            
+            if (matches.length === 0) {
+                matchesGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Nenhum match encontrado ainda</h3>
+                        <p>Continue explorando para encontrar o imóvel ideal</p>
+                    </div>
+                `;
+                return;
+            }
+
+            matchesGrid.innerHTML = matches.map(property => `
+                <div class="property-card">
+                    <div class="match-badge">${property.match}% match</div>
+                    <img src="${property.image}" alt="${property.title}" class="property-image">
+                    <div class="property-content">
+                        <h3 class="property-title">${property.title}</h3>
+                        <p class="property-price">${property.price}</p>
+                        <div class="property-features">
+                            ${property.features.map(feature => `
+                                <span class="feature-tag">${feature}</span>
+                            `).join('')}
+                        </div>
+                        <div class="property-card-buttons">
+                            <button class="card-button view-button" 
+                                    onclick="viewDetails('${property.id}')">
+                                Ver detalhes
+                            </button>
+                            <button class="card-button contact-button" 
+                                    onclick="contactProperty('${property.id}')">
+                                Contatar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewDetails(propertyId) {
+            const property = matches.find(p => p.id === propertyId);
+            if (property) {
+                localStorage.setItem('currentProperty', JSON.stringify(property));
+                window.location.href = 'property-details.html';
+            }
+        }
+
+        function contactProperty(propertyId) {
+            // Implementar lógica de contato
+            alert('Funcionalidade de contato em desenvolvimento');
+        }
+
+        function showScheduleModal() {
+            // Implementar modal de agendamento
+            alert('Funcionalidade de agendamento em desenvolvimento');
+        }
+
+        // Inicializar página
+        updateStats();
+        renderMatches();
+    </script>
+</body>
+</html>

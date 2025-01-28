@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Descubra seu Lar</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        /* Estilos específicos da página property-cards */
+        body {
+            background-color: var(--surface-alt);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .toggle-button {
+            padding: var(--spacing-xs) var(--spacing-md);
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--surface-alt);
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .toggle-button.active {
+            background: var(--primary);
+            color: var(--surface);
+        }
+
+        .card-stack {
+            position: relative;
+            height: 600px;
+        }
+
+        .property-card {
+            position: absolute;
+            width: 100%;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease-out;
+            cursor: grab;
+            top: 0;
+            left: 0;
+        }
+
+        .property-card.dragging {
+            cursor: grabbing;
+            transition: none;
+        }
+
+        .match-badge {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background: var(--primary);
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-weight: 500;
+            z-index: 1;
+            backdrop-filter: blur(4px);
+        }
+
+        .match-badge.high-match {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            animation: pulse 2s infinite;
+        }
+
+        .property-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .property-content {
+            padding: var(--spacing-md);
+        }
+
+        .property-tips {
+            margin: var(--spacing-sm) 0;
+        }
+
+        .tip {
+            background: var(--primary-light);
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-xs);
+            font-size: 0.875rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: var(--spacing-md);
+            border-top: 1px solid var(--border);
+        }
+
+        .action-button {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .action-button:hover {
+            transform: scale(1.1);
+        }
+
+        .dislike-button {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .like-button {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .info-button {
+            background: var(--surface-alt);
+            color: var(--primary);
+        }
+
+        .choice-info {
+            position: fixed;
+            top: 50%;
+            font-size: 8rem;
+            font-weight: bold;
+            color: var(--surface);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transform: translateY(-50%);
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .choice-like {
+            right: 10%;
+            color: var(--success);
+        }
+
+        .choice-nope {
+            left: 10%;
+            color: var(--danger);
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            padding: var(--spacing-sm);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .progress-content {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        #matches-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+		
+		/* Grid View Styles */
+		.grid-view {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: var(--spacing-md);
+			padding: var(--spacing-md) 0;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.grid-view .property-card {
+			position: relative;
+			width: 100%;
+			height: auto;
+			background: var(--surface);
+			border-radius: var(--radius-lg);
+			overflow: hidden;
+			box-shadow: var(--shadow-sm);
+			transition: transform 0.2s, box-shadow 0.2s;
+			cursor: default;
+			transform: none !important;
+		}
+
+		.grid-view .property-card:hover {
+			transform: translateY(-4px) !important;
+			box-shadow: var(--shadow-md);
+		}
+
+		.grid-view .property-image {
+			width: 100%;
+			height: 240px;
+			object-fit: cover;
+		}
+
+		.grid-view .property-content {
+			padding: var(--spacing-md);
+		}
+
+		.grid-view .property-title {
+			font-size: 1.25rem;
+			font-weight: 600;
+			color: var(--text);
+			margin-bottom: var(--spacing-xs);
+		}
+
+		.grid-view .property-price {
+			font-size: 1.25rem;
+			color: var(--success);
+			font-weight: 500;
+			margin-bottom: var(--spacing-sm);
+		}
+
+		.grid-view .property-features {
+			display: flex;
+			flex-wrap: wrap;
+			gap: var(--spacing-xs);
+			margin: var(--spacing-sm) 0;
+		}
+
+		.grid-view .feature-tag {
+			background: var(--surface-alt);
+			padding: var(--spacing-xs) var(--spacing-sm);
+			border-radius: var(--radius-full);
+			font-size: 0.875rem;
+			color: var(--text-light);
+		}
+
+		.grid-view .grid-actions {
+			display: flex;
+			gap: var(--spacing-xs);
+			margin-top: var(--spacing-sm);
+			padding-top: var(--spacing-sm);
+			border-top: 1px solid var(--border);
+		}
+
+		.grid-view .grid-button {
+			flex: 1;
+			padding: var(--spacing-xs) var(--spacing-sm);
+			border: none;
+			border-radius: var(--radius-sm);
+			cursor: pointer;
+			font-size: 0.875rem;
+			transition: all 0.2s;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: var(--spacing-xs);
+		}
+
+		.grid-view .grid-button.like {
+			background: var(--success-light);
+			color: var(--success);
+		}
+
+		.grid-view .grid-button.info {
+			background: var(--surface-alt);
+			color: var(--primary);
+		}
+
+		.container.grid-mode {
+			max-width: 1200px;
+		}
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--spacing-sm);
+            }
+
+            .property-card {
+                margin: 0 var(--spacing-sm);
+            }
+
+            .action-button {
+                width: 56px;
+                height: 56px;
+                font-size: 1.25rem;
+            }
+			
+			.grid-view {
+				grid-template-columns: 1fr;
+			}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+                <button class="button button-secondary" onclick="window.location.href='index.html'">Voltar</button>
+            </div>
+        </header>
+
+        <div class="view-toggle">
+            <button class="toggle-button active" onclick="switchView('cards')" id="cards-view-btn">
+                <span>🎴</span> Cards
+            </button>
+            <button class="toggle-button" onclick="switchView('grid')" id="grid-view-btn">
+                <span>📑</span> Lista
+            </button>
+        </div>
+
+        <div id="cards-view" class="view-container">
+            <div id="card-stack" class="card-stack"></div>
+            <div class="choice-info choice-like">LIKE</div>
+            <div class="choice-info choice-nope">NOPE</div>
+        </div>
+
+        <div id="grid-view" class="view-container" style="display: none;"></div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-content">
+            <div class="progress-item">
+                <span>🎯</span>
+                <span>Nível 2</span>
+            </div>
+            <div class="progress-item">
+                <span>💝</span>
+                <span id="matches-count">0 matches</span>
+            </div>
+            <div class="progress-item">
+                <span>⭐</span>
+                <span>Explorador</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="matches-modal" class="matches-modal">
+        <div class="modal-content">
+            <h2 class="title-md">Encontramos seus matches!</h2>
+            <p class="text-body">Baseado nas suas escolhas, selecionamos os imóveis perfeitos para você.</p>
+            <button class="button button-primary" onclick="window.location.href='matches.html'">
+                Ver meus matches
+            </button>
+        </div>
+    </div>
+
+    <script>
+		const propertiesData = {
+			beach: [
+				{
+					id: 1,
+					title: 'Casa na Praia dos Sonhos',
+					price: 'R$ 850.000',
+					image: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80',
+					features: ['Vista para o mar', '3 quartos', '200m²', 'Piscina', 'Área tranquila', 'Alto potencial de valorização'],
+					details: {
+						location: 'Primeira quadra do mar',
+						noiseLevel: 'low',
+						nearActivities: true,
+						investmentPotential: true
+					}
+				},
+				{
+					id: 2,
+					title: 'Apartamento Beira Mar',
+					price: 'R$ 650.000',
+					image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80',
+					features: ['Varanda gourmet', '2 quartos', '120m²', 'Academia', 'Próximo ao centro', 'Andar alto'],
+					details: {
+						location: 'Avenida beira mar',
+						noiseLevel: 'medium',
+						nearActivities: true,
+						investmentPotential: true
+					}
+				}
+			],
+			city: [
+				{
+					id: 3,
+					title: 'Apartamento Jardins',
+					price: 'R$ 750.000',
+					image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80',
+					features: ['Alto padrão', '3 quartos', '150m²', 'Varanda', 'Próximo a comércios', 'Condomínio fechado'],
+					details: {
+						location: 'Jardins',
+						noiseLevel: 'low',
+						nearActivities: true,
+						investmentPotential: true
+					}
+				},
+				{
+					id: 4,
+					title: 'Studio Centro',
+					price: 'R$ 450.000',
+					image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80',
+					features: ['Mobiliado', '1 quarto', '45m²', 'Academia', 'Próximo ao centro', 'Alto potencial de valorização'],
+					details: {
+						location: 'Centro',
+						noiseLevel: 'high',
+						nearActivities: true,
+						investmentPotential: true
+					}
+				}
+			],
+			countryside: [
+				{
+					id: 5,
+					title: 'Casa de Campo',
+					price: 'R$ 920.000',
+					image: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80',
+					features: ['Área verde', '4 quartos', '300m²', 'Piscina', 'Área tranquila', 'Condomínio fechado'],
+					details: {
+						location: 'Condomínio Campo Verde',
+						noiseLevel: 'very_low',
+						nearActivities: false,
+						investmentPotential: false
+					}
+				},
+				{
+					id: 6,
+					title: 'Chácara Especial',
+					price: 'R$ 780.000',
+					image: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80',
+					features: ['Pomar', '3 quartos', '250m²', 'Lago', 'Área verde', 'Área tranquila'],
+					details: {
+						location: 'Área rural',
+						noiseLevel: 'very_low',
+						nearActivities: false,
+						investmentPotential: false
+					}
+				}
+			]
+		};
+
+		let currentIndex = 0;
+		let matchesCount = 0;
+		let currentView = 'cards';
+		const matchesList = [];		
+
+		// Carregar preferências e estilo de vida
+		const userPreferences = JSON.parse(localStorage.getItem('preferences')) || {};
+		const lifestyle = localStorage.getItem('selectedLifestyle') || 'beach';
+
+		function switchView(view) {
+			const cardsView = document.getElementById('cards-view');
+			const gridView = document.getElementById('grid-view');
+			const cardsBtn = document.getElementById('cards-view-btn');
+			const gridBtn = document.getElementById('grid-view-btn');
+			const container = document.querySelector('.container');
+
+			currentView = view;
+
+			if (view === 'cards') {
+				cardsView.style.display = 'block';
+				gridView.style.display = 'none';
+				cardsBtn.classList.add('active');
+				gridBtn.classList.remove('active');
+				container.classList.remove('grid-mode');
+				
+				if (!document.querySelector('.property-card')) {
+					const firstCard = createPropertyCard(properties[currentIndex]);
+					document.getElementById('card-stack').appendChild(firstCard);
+				}
+			} else {
+				cardsView.style.display = 'none';
+				gridView.style.display = 'grid';
+				cardsBtn.classList.remove('active');
+				gridBtn.classList.add('active');
+				container.classList.add('grid-mode');
+				renderPropertyGrid();
+			}
+		}
+
+		function renderPropertyGrid() {
+			const gridView = document.getElementById('grid-view');
+			document.querySelector('.container').classList.add('grid-mode');
+			
+			gridView.innerHTML = properties.map((property, index) => {
+				const features = property.features
+					.slice(0, 3) // Mostrar apenas 3 features principais
+					.map(feature => `<span class="feature-tag">${feature}</span>`)
+					.join('');
+					
+				return `
+					<div class="property-card">
+						<div class="match-badge ${property.match > 90 ? 'high-match' : ''}">${property.match}% match</div>
+						<img src="${property.image}" alt="${property.title}" class="property-image">
+						<div class="property-content">
+							<h2 class="property-title">${property.title}</h2>
+							<p class="property-price">${property.price}</p>
+							<div class="property-features">
+								${features}
+							</div>
+							<div class="grid-actions">
+								<button class="grid-button like" onclick="handleGridChoice(${index}, true)">
+									<span>💚</span> Gostei
+								</button>
+								<button class="grid-button info" onclick="showDetails(${property.id})">
+									<span>ℹ️</span> Detalhes
+								</button>
+							</div>
+						</div>
+					</div>
+				`;
+			}).join('');
+		}
+
+		function handleGridChoice(index, liked) {
+			const property = properties[index];
+			const card = document.querySelectorAll('.property-card')[index];
+			
+			if (liked) {
+				matchesCount++;
+				matchesList.push(property);
+				document.getElementById('matches-count').textContent = `${matchesCount} matches`;
+				
+				// Animação de saída
+				card.style.transform = 'scale(0.9)';
+				card.style.opacity = '0';
+				
+				setTimeout(() => {
+					card.remove();
+					
+					// Verificar se atingiu o número mínimo de matches
+					if (matchesCount >= Math.ceil(properties.length / 2)) {
+						showMatchesModal();
+					}
+				}, 300);
+			}
+		}
+
+		// Função para calcular o match score
+		function calculateMatchScore(property) {
+			let score = 0;
+			
+			// Match baseado no propósito (investir/morar)
+			if (userPreferences.purpose) {
+				if (userPreferences.purpose === 'invest' && property.details.investmentPotential) {
+					score += 25;
+				}
+				if (userPreferences.purpose === 'live' && property.features.includes('Área tranquila')) {
+					score += 25;
+				}
+				if (userPreferences.purpose === 'both' && 
+					property.details.investmentPotential && 
+					property.features.includes('Área tranquila')) {
+					score += 25;
+				}
+			}
+
+			// Match baseado no estilo de vida
+			if (userPreferences.lifestyle) {
+				if (userPreferences.lifestyle === 'quiet' && property.details.noiseLevel === 'low') {
+					score += 20;
+				}
+				if (userPreferences.lifestyle === 'active' && property.details.nearActivities) {
+					score += 20;
+				}
+			}
+
+			// Match baseado nas prioridades
+			if (userPreferences.priorities) {
+				const size = parseInt(property.features.find(f => f.includes('m²')) || '0');
+				
+				if (userPreferences.priorities.includes('space') && size > 150) {
+					score += 15;
+				}
+				if (userPreferences.priorities.includes('privacy') && 
+					property.features.includes('Condomínio fechado')) {
+					score += 15;
+				}
+			}
+
+			// Match baseado no entorno desejado
+			if (userPreferences.surrounding) {
+				if (userPreferences.surrounding.includes('nature') && 
+					(property.features.includes('Área verde') || property.features.includes('Vista para o mar'))) {
+					score += 15;
+				}
+				if (userPreferences.surrounding.includes('services') && 
+					property.features.includes('Próximo a comércios')) {
+					score += 15;
+				}
+			}
+
+			// Normalizar o score para máximo de 100
+			return Math.min(Math.round(score), 100);
+		}
+
+		// Filtrar e ordenar propriedades baseado nas preferências
+		const properties = propertiesData[lifestyle]
+			.map(property => ({
+				...property,
+				match: calculateMatchScore(property)
+			}))
+			.sort((a, b) => b.match - a.match);
+
+		// Gerar dicas personalizadas
+		function generatePersonalizedTips(property) {
+			const tips = [];
+			
+			if (property.match > 90) {
+				tips.push('✨ Match perfeito para seu perfil!');
+			}
+
+			if (userPreferences.purpose === 'invest' && property.details.investmentPotential) {
+				tips.push('💰 Ótimo potencial de valorização');
+			}
+
+			if (userPreferences.lifestyle === 'quiet' && property.details.noiseLevel === 'low') {
+				tips.push('🌟 Localização tranquila ideal');
+			}
+
+			const size = parseInt(property.features.find(f => f.includes('m²')) || '0');
+			if (userPreferences.priorities?.includes('space') && size > 150) {
+				tips.push('📐 Espaço amplo como você procura');
+			}
+
+			return tips.length ? tips.map(tip => `<div class="tip">${tip}</div>`).join('') : '';
+		}
+
+		function createPropertyCard(property) {
+			const card = document.createElement('div');
+			card.className = 'property-card';
+			
+			const tips = generatePersonalizedTips(property);
+			
+			card.innerHTML = `
+				<div class="match-badge ${property.match > 90 ? 'high-match' : ''}">${property.match}% match</div>
+				<img src="${property.image}" alt="${property.title}" class="property-image">
+				<div class="property-content">
+					<h2 class="property-title">${property.title}</h2>
+					<p class="property-price">${property.price}</p>
+					${tips ? `<div class="property-tips">${tips}</div>` : ''}
+					<div class="property-features">
+						${property.features.map(feature => `
+							<span class="feature-tag">${feature}</span>
+						`).join('')}
+					</div>
+					<div class="action-buttons">
+						<button class="action-button dislike-button" onclick="handleChoice(false)">❌</button>
+						<button class="action-button info-button" onclick="showDetails(${property.id})">ℹ️</button>
+						<button class="action-button like-button" onclick="handleChoice(true)">💚</button>
+					</div>
+				</div>
+			`;
+			
+			initializeDrag(card);
+			return card;
+		}
+
+        function initializeDrag(element) {
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+
+            element.addEventListener('mousedown', startDragging);
+            element.addEventListener('touchstart', (e) => {
+                startDragging(e.touches[0]);
+            });
+
+            function startDragging(e) {
+                isDragging = true;
+                startX = e.clientX - currentX;
+                element.classList.add('dragging');
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                drag(e);
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                drag(e.touches[0]);
+            });
+
+            function drag(e) {
+                if (!isDragging) return;
+                currentX = e.clientX - startX;
+                element.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.1}deg)`;
+                
+                // Mostrar indicadores de escolha
+                const likeIndicator = document.querySelector('.choice-like');
+                const nopeIndicator = document.querySelector('.choice-nope');
+                
+                if (currentX > 100) {
+                    likeIndicator.style.opacity = currentX / 500;
+                } else if (currentX < -100) {
+                    nopeIndicator.style.opacity = Math.abs(currentX) / 500;
+                } else {
+                    likeIndicator.style.opacity = 0;
+                    nopeIndicator.style.opacity = 0;
+                }
+            }
+
+            document.addEventListener('mouseup', endDragging);
+            document.addEventListener('touchend', endDragging);
+
+            function endDragging() {
+                if (!isDragging) return;
+                isDragging = false;
+                element.classList.remove('dragging');
+                
+                // Determinar a escolha baseado na posição final
+                if (currentX > 100) {
+                    handleChoice(true);
+                } else if (currentX < -100) {
+                    handleChoice(false);
+                } else {
+                    element.style.transform = '';
+                }
+                
+                // Resetar indicadores
+                document.querySelector('.choice-like').style.opacity = 0;
+                document.querySelector('.choice-nope').style.opacity = 0;
+            }
+        }
+
+        function handleChoice(liked) {
+            const currentCard = document.querySelector('.property-card');
+            if (!currentCard) return;
+
+            const currentProperty = properties[currentIndex];
+
+            // Animação de saída
+            const direction = liked ? 1 : -1;
+            currentCard.style.transform = `translateX(${direction * window.innerWidth}px) rotate(${direction * 30}deg)`;
+            
+            // Se foi like, adicionar aos matches
+            if (liked && currentProperty) {
+                matchesCount++;
+                matchesList.push(currentProperty);
+                document.getElementById('matches-count').textContent = `${matchesCount} matches`;
+            }
+
+            // Remover card após a animação
+            setTimeout(() => {
+                currentCard.remove();
+                currentIndex++;
+                
+                // Verificar se ainda há cards
+                if (currentIndex < properties.length) {
+                    const newCard = createPropertyCard(properties[currentIndex]);
+                    document.getElementById('card-stack').appendChild(newCard);
+                } else {
+                    showMatchesModal();
+                }
+            }, 300);
+        }
+
+        function showMatchesModal() {
+            const modal = document.getElementById('matches-modal');
+            modal.style.display = 'flex';
+            
+            // Salvar matches no localStorage para a próxima página
+            localStorage.setItem('matches', JSON.stringify(matchesList));
+        }
+
+        function showDetails(propertyId) {
+            // Salvar propriedade atual para visualização detalhada
+            const property = properties.find(p => p.id === propertyId);
+            if (property) {
+                localStorage.setItem('currentProperty', JSON.stringify(property));
+                window.location.href = 'property-details.html';
+            }
+        }
+
+        // Inicializar primeiro card
+        if (properties.length > 0) {
+            const firstCard = createPropertyCard(properties[0]);
+            document.getElementById('card-stack').appendChild(firstCard);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Perfis de Comprador</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        /* Estilos específicos da página de perfis */
+        .section-header {
+            margin-bottom: var(--spacing-lg);
+            max-width: 800px;
+        }
+
+        .section-title {
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .section-description {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .profile-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .new-profile-card {
+            border: 2px dashed var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl);
+            cursor: pointer;
+            background: var(--surface);
+            min-height: 300px;
+        }
+
+        .new-profile-card:hover {
+            border-color: var(--primary);
+            background: var(--surface-alt);
+        }
+
+        .new-profile-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-full);
+            background: var(--surface-alt);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+            color: var(--primary);
+        }
+
+        .profile-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .profile-type {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--text);
+        }
+
+        .profile-summary {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .profile-content {
+            padding: var(--spacing-md);
+        }
+
+        .preferences-list {
+            list-style: none;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .preferences-list li {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .preferences-list li::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: var(--radius-full);
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-md);
+            border-top: 1px solid var(--border);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            margin-top: var(--spacing-lg);
+        }
+
+        .lifestyle-icon {
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .profiles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+            </div>
+        </header>
+
+        <div class="section-header">
+            <h2 class="title-lg">Seus Perfis de Comprador</h2>
+            <p class="section-description">Gerencie diferentes perfis para suas buscas de imóveis</p>
+        </div>
+
+        <div class="profiles-grid" id="profiles-grid">
+            <!-- Os perfis serão inseridos aqui via JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        function getLifestyleIcon(lifestyle) {
+            switch (lifestyle) {
+                case 'beach': return '🌊';
+                case 'city': return '🌆';
+                case 'countryside': return '🌳';
+                default: return '🏠';
+            }
+        }
+
+        function formatPreferences(preferences) {
+            const items = [];
+            if (preferences.purpose) {
+                items.push(preferences.purpose === 'live' ? 'Morar' : 
+                         preferences.purpose === 'invest' ? 'Investir' : 'Morar e Investir');
+            }
+            if (preferences.lifestyle) {
+                items.push(preferences.lifestyle === 'quiet' ? 'Ambiente Tranquilo' : 
+                         preferences.lifestyle === 'active' ? 'Ambiente Movimentado' : 'Ambiente Equilibrado');
+            }
+            return items.join(' • ');
+        }
+
+        function createNewProfile() {
+            localStorage.removeItem('preferences');
+            localStorage.removeItem('selectedLifestyle');
+            window.location.href = 'index.html';
+        }
+
+        function useProfile(profile) {
+            try {
+                const profileObj = typeof profile === 'string' ? JSON.parse(profile) : profile;
+                localStorage.setItem('activeProfile', JSON.stringify(profileObj));
+                localStorage.setItem('preferences', JSON.stringify(profileObj.preferences));
+                localStorage.setItem('selectedLifestyle', profileObj.lifestyle);
+                window.location.href = 'property-cards.html';
+            } catch (error) {
+                console.error('Erro ao usar perfil:', error);
+                alert('Ocorreu um erro ao selecionar o perfil. Por favor, tente novamente.');
+            }
+        }
+
+        function deleteProfile(profileId) {
+            if (confirm('Tem certeza que deseja excluir este perfil?')) {
+                const profiles = JSON.parse(localStorage.getItem('buyerProfiles')) || [];
+                const updatedProfiles = profiles.filter(p => p.id !== profileId);
+                localStorage.setItem('buyerProfiles', JSON.stringify(updatedProfiles));
+                renderProfiles();
+            }
+        }
+
+        function renderProfiles() {
+            const profilesGrid = document.getElementById('profiles-grid');
+            const profiles = JSON.parse(localStorage.getItem('buyerProfiles')) || [];
+
+            let html = `
+                <div class="profile-card new-profile-card" onclick="createNewProfile()">
+                    <div class="new-profile-icon">+</div>
+                    <h3 class="title-sm">Criar Novo Perfil</h3>
+                    <p class="text-body">Inicie um novo perfil de busca</p>
+                </div>
+            `;
+
+            profiles.forEach(profile => {
+                html += `
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-type">
+                                <span class="lifestyle-icon">${getLifestyleIcon(profile.lifestyle)}</span>
+                                ${profile.name}
+                            </div>
+                            <div class="profile-summary">${formatPreferences(profile.preferences)}</div>
+                        </div>
+                        <div class="profile-content">
+                            <ul class="preferences-list">
+                                ${profile.preferences.priorities?.map(priority => `
+                                    <li>${priority}</li>
+                                `).join('') || ''}
+                            </ul>
+                        </div>
+                        <div class="profile-actions">
+                            <button class="button button-primary" onclick='useProfile(${JSON.stringify(profile)})'>
+                                Usar este perfil
+                            </button>
+                            <button class="button button-secondary" onclick="deleteProfile('${profile.id}')">
+                                Excluir
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            profilesGrid.innerHTML = html;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const hasProfiles = localStorage.getItem('buyerProfiles');
+            if (!hasProfiles) {
+                window.location.href = 'index.html';
+            } else {
+                renderProfiles();
+            }
+        });
+    </script>
+</body>
+</html>
