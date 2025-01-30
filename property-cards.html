@@ -18,6 +18,67 @@
             margin: 0 auto;
             padding-bottom: 100px;
         }
+		
+       body {
+            background-color: var(--surface-alt);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+
+        /* Adicionar estilos para o perfil ativo */
+        .active-profile {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--surface);
+            font-size: 1.25rem;
+        }
+
+        .profile-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .profile-preferences {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+        }
+
+        .preference-tag {
+            background: var(--surface-alt);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
 
         .view-toggle {
             display: flex;
@@ -354,9 +415,32 @@
         <header class="header">
             <div class="header-content">
                 <h1 class="logo">Modulari</h1>
-                <button class="button button-secondary" onclick="window.location.href='index.html'">Voltar</button>
+                <div class="header-actions">
+                    <button class="button button-secondary" onclick="window.location.href='matches.html'">
+                        Ver Matches
+                    </button>
+                    <button class="button button-secondary" onclick="window.location.href='profiles.html'">
+                        Trocar Perfil
+                    </button>
+                </div>
             </div>
         </header>
+
+        <!-- Informações do Perfil Ativo -->
+        <div class="active-profile">
+            <div class="profile-header">
+                <div class="profile-icon" id="profileIcon"></div>
+                <div class="profile-info">
+                    <h3 id="profileName">Carregando perfil...</h3>
+                    <div class="profile-preferences" id="profilePreferences">
+                        <!-- Preferências serão inseridas aqui -->
+                    </div>
+                </div>
+            </div>
+            <div class="profile-stats" id="profileStats">
+                <!-- Estatísticas do perfil serão inseridas aqui -->
+            </div>
+        </div>
 
         <div class="view-toggle">
             <button class="toggle-button active" onclick="switchView('cards')" id="cards-view-btn">
@@ -380,7 +464,7 @@
         <div class="progress-content">
             <div class="progress-item">
                 <span>🎯</span>
-                <span>Nível 2</span>
+                <span id="profile-level">Nível 1</span>
             </div>
             <div class="progress-item">
                 <span>💝</span>
@@ -388,22 +472,18 @@
             </div>
             <div class="progress-item">
                 <span>⭐</span>
-                <span>Explorador</span>
+                <span id="profile-status">Explorador</span>
             </div>
         </div>
     </div>
+	
+	<script>
+        // Verificar se há um perfil ativo
+        const activeProfile = JSON.parse(localStorage.getItem('activeProfile'));
+        if (!activeProfile) {
+            window.location.href = 'profiles.html';
+        }
 
-    <div id="matches-modal" class="matches-modal">
-        <div class="modal-content">
-            <h2 class="title-md">Encontramos seus matches!</h2>
-            <p class="text-body">Baseado nas suas escolhas, selecionamos os imóveis perfeitos para você.</p>
-            <button class="button button-primary" onclick="window.location.href='matches.html'">
-                Ver meus matches
-            </button>
-        </div>
-    </div>
-
-    <script>
 		const propertiesData = {
 			beach: [
 				{
@@ -494,11 +574,14 @@
 		let currentIndex = 0;
 		let matchesCount = 0;
 		let currentView = 'cards';
-		const matchesList = [];		
 
-		// Carregar preferências e estilo de vida
-		const userPreferences = JSON.parse(localStorage.getItem('preferences')) || {};
-		const lifestyle = localStorage.getItem('selectedLifestyle') || 'beach';
+        // Carregar matches existentes do perfil ativo
+        let matches = JSON.parse(localStorage.getItem(`matches_${activeProfile.id}`)) || [];
+        matchesCount = matches.length;
+
+		// Carregar preferências do perfil ativo
+		const userPreferences = activeProfile.preferences;
+		const lifestyle = activeProfile.lifestyle;
 
 		function switchView(view) {
 			const cardsView = document.getElementById('cards-view');
@@ -536,7 +619,7 @@
 			
 			gridView.innerHTML = properties.map((property, index) => {
 				const features = property.features
-					.slice(0, 3) // Mostrar apenas 3 features principais
+					.slice(0, 3)
 					.map(feature => `<span class="feature-tag">${feature}</span>`)
 					.join('');
 					
@@ -569,18 +652,16 @@
 			const card = document.querySelectorAll('.property-card')[index];
 			
 			if (liked) {
-				matchesCount++;
-				matchesList.push(property);
+                saveMatch(property);
+                matchesCount++;
 				document.getElementById('matches-count').textContent = `${matchesCount} matches`;
 				
-				// Animação de saída
 				card.style.transform = 'scale(0.9)';
 				card.style.opacity = '0';
 				
 				setTimeout(() => {
 					card.remove();
 					
-					// Verificar se atingiu o número mínimo de matches
 					if (matchesCount >= Math.ceil(properties.length / 2)) {
 						showMatchesModal();
 					}
@@ -588,11 +669,9 @@
 			}
 		}
 
-		// Função para calcular o match score
 		function calculateMatchScore(property) {
 			let score = 0;
 			
-			// Match baseado no propósito (investir/morar)
 			if (userPreferences.purpose) {
 				if (userPreferences.purpose === 'invest' && property.details.investmentPotential) {
 					score += 25;
@@ -607,7 +686,6 @@
 				}
 			}
 
-			// Match baseado no estilo de vida
 			if (userPreferences.lifestyle) {
 				if (userPreferences.lifestyle === 'quiet' && property.details.noiseLevel === 'low') {
 					score += 20;
@@ -617,7 +695,6 @@
 				}
 			}
 
-			// Match baseado nas prioridades
 			if (userPreferences.priorities) {
 				const size = parseInt(property.features.find(f => f.includes('m²')) || '0');
 				
@@ -630,7 +707,6 @@
 				}
 			}
 
-			// Match baseado no entorno desejado
 			if (userPreferences.surrounding) {
 				if (userPreferences.surrounding.includes('nature') && 
 					(property.features.includes('Área verde') || property.features.includes('Vista para o mar'))) {
@@ -642,11 +718,9 @@
 				}
 			}
 
-			// Normalizar o score para máximo de 100
 			return Math.min(Math.round(score), 100);
 		}
 
-		// Filtrar e ordenar propriedades baseado nas preferências
 		const properties = propertiesData[lifestyle]
 			.map(property => ({
 				...property,
@@ -654,7 +728,6 @@
 			}))
 			.sort((a, b) => b.match - a.match);
 
-		// Gerar dicas personalizadas
 		function generatePersonalizedTips(property) {
 			const tips = [];
 			
@@ -740,7 +813,6 @@
                 currentX = e.clientX - startX;
                 element.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.1}deg)`;
                 
-                // Mostrar indicadores de escolha
                 const likeIndicator = document.querySelector('.choice-like');
                 const nopeIndicator = document.querySelector('.choice-nope');
                 
@@ -762,7 +834,6 @@
                 isDragging = false;
                 element.classList.remove('dragging');
                 
-                // Determinar a escolha baseado na posição final
                 if (currentX > 100) {
                     handleChoice(true);
                 } else if (currentX < -100) {
@@ -771,10 +842,23 @@
                     element.style.transform = '';
                 }
                 
-                // Resetar indicadores
                 document.querySelector('.choice-like').style.opacity = 0;
                 document.querySelector('.choice-nope').style.opacity = 0;
             }
+        }
+
+		function saveMatch(property) {
+            // Adicionar informações extras ao match
+            const match = {
+                ...property,
+                addedAt: new Date().toISOString(),
+                profileId: activeProfile.id,
+                notes: '',
+                rating: 0
+            };
+
+            matches.push(match);
+            localStorage.setItem(`matches_${activeProfile.id}`, JSON.stringify(matches));
         }
 
         function handleChoice(liked) {
@@ -783,23 +867,19 @@
 
             const currentProperty = properties[currentIndex];
 
-            // Animação de saída
             const direction = liked ? 1 : -1;
             currentCard.style.transform = `translateX(${direction * window.innerWidth}px) rotate(${direction * 30}deg)`;
             
-            // Se foi like, adicionar aos matches
             if (liked && currentProperty) {
+                saveMatch(currentProperty);
                 matchesCount++;
-                matchesList.push(currentProperty);
                 document.getElementById('matches-count').textContent = `${matchesCount} matches`;
             }
 
-            // Remover card após a animação
             setTimeout(() => {
                 currentCard.remove();
                 currentIndex++;
                 
-                // Verificar se ainda há cards
                 if (currentIndex < properties.length) {
                     const newCard = createPropertyCard(properties[currentIndex]);
                     document.getElementById('card-stack').appendChild(newCard);
@@ -812,19 +892,18 @@
         function showMatchesModal() {
             const modal = document.getElementById('matches-modal');
             modal.style.display = 'flex';
-            
-            // Salvar matches no localStorage para a próxima página
-            localStorage.setItem('matches', JSON.stringify(matchesList));
         }
 
         function showDetails(propertyId) {
-            // Salvar propriedade atual para visualização detalhada
             const property = properties.find(p => p.id === propertyId);
             if (property) {
                 localStorage.setItem('currentProperty', JSON.stringify(property));
                 window.location.href = 'property-details.html';
             }
         }
+
+        // Atualizar UI inicial
+        document.getElementById('matches-count').textContent = `${matchesCount} matches`;
 
         // Inicializar primeiro card
         if (properties.length > 0) {

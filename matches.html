@@ -6,7 +6,6 @@
     <title>Modulari - Seus Matches</title>
     <link rel="stylesheet" href="base-styles.css">
     <style>
-        /* Page specific styles */
         .matches-summary {
             background: var(--surface);
             border-radius: var(--radius-lg);
@@ -48,6 +47,7 @@
             overflow: hidden;
             box-shadow: var(--shadow-sm);
             transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: var(--spacing-md);
         }
 
         .property-card:hover {
@@ -64,6 +64,20 @@
             padding: var(--spacing-xs) var(--spacing-sm);
             border-radius: 20px;
             font-weight: 500;
+            z-index: 1;
+        }
+
+        .changes-badge {
+            position: absolute;
+            top: var(--spacing-sm);
+            left: var(--spacing-sm);
+            background: #FF5722;
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-weight: 500;
+            z-index: 1;
+            animation: pulse 2s infinite;
         }
 
         .property-image {
@@ -91,38 +105,118 @@
             color: var(--text-light);
         }
 
+        .notes-section {
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--border);
+        }
+
+        .notes-input {
+            width: 100%;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            resize: vertical;
+            font-size: 0.875rem;
+            min-height: 80px;
+            margin-top: var(--spacing-xs);
+        }
+
+        .rating-section {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin: var(--spacing-sm) 0;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0;
+            color: #FFB300;
+            transition: transform 0.2s;
+        }
+
+        .star-button:hover {
+            transform: scale(1.1);
+        }
+
         .card-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: var(--spacing-xs);
             margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--border);
+        }
+
+        .sort-options {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .sort-button {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .sort-button.active {
+            background: var(--primary);
+            color: var(--surface);
+            border-color: var(--primary);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .sort-options {
+                flex-wrap: wrap;
+            }
+            
+            .sort-button {
+                flex: 1;
+                min-width: 120px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="logo">Modulari</h1>
-            <div class="header-actions">
-                <button class="button secondary-button" onclick="window.location.href='property-cards.html'">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+                <button class="button button-secondary" onclick="window.location.href='property-cards.html'">
                     Continuar buscando
-                </button>
-                <button class="button primary-button" onclick="showScheduleModal()">
-                    Agendar visitas
                 </button>
             </div>
         </header>
 
         <div class="matches-summary">
-            <h2 class="summary-title">Seus Matches</h2>
+            <h2 class="title-lg">Seus Matches</h2>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="total-matches">0</div>
                     <div class="stat-label">Matches encontrados</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="match-score">0%</div>
-                    <div class="stat-label">Match médio</div>
+                    <div class="stat-value" id="avg-rating">0.0</div>
+                    <div class="stat-label">Avaliação média</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="price-range">R$ 0</div>
@@ -131,40 +225,129 @@
             </div>
         </div>
 
+        <div class="sort-options">
+            <button class="sort-button active" onclick="sortMatches('match')">
+                % Match
+            </button>
+            <button class="sort-button" onclick="sortMatches('rating')">
+                Avaliação
+            </button>
+            <button class="sort-button" onclick="sortMatches('price')">
+                Preço
+            </button>
+            <button class="sort-button" onclick="sortMatches('date')">
+                Data de adição
+            </button>
+        </div>
+
         <div id="matches-grid" class="matches-grid">
             <!-- Os matches serão inseridos aqui via JavaScript -->
         </div>
-
-		<div class="alternative-search">
-			<p>Não encontrou o que procurava?</p>
-			<button class="button primary-button" onclick="window.location.href='traditional-search.html'">
-				Buscar de forma tradicional
-			</button>
-		</div>
     </div>
 
     <script>
-        // Recuperar matches do localStorage
+        // Recuperar perfil ativo e seus matches
+        const activeProfile = JSON.parse(localStorage.getItem('activeProfile')) || {};
         const matches = JSON.parse(localStorage.getItem('matches')) || [];
+        let sortType = 'match';
 
         function updateStats() {
             const totalMatches = matches.length;
             const averageMatch = matches.reduce((acc, curr) => acc + curr.match, 0) / totalMatches;
+            const averageRating = matches.reduce((acc, curr) => acc + (curr.rating || 0), 0) / totalMatches;
             const averagePrice = matches.reduce((acc, curr) => {
                 const price = parseInt(curr.price.replace(/\D/g, ''));
                 return acc + price;
             }, 0) / totalMatches;
 
             document.getElementById('total-matches').textContent = totalMatches;
-            document.getElementById('match-score').textContent = `${Math.round(averageMatch)}%`;
+            document.getElementById('avg-rating').textContent = averageRating.toFixed(1);
             document.getElementById('price-range').textContent = 
                 `R$ ${(averagePrice).toLocaleString('pt-BR')}`;
         }
 
-        function renderMatches() {
+        function checkForChanges(property) {
+            // Aqui você implementaria a lógica real de verificação de mudanças
+            // Por enquanto, vamos simular algumas mudanças
+            const lastCheck = new Date(property.lastCheck || property.addedAt).getTime();
+            const now = new Date().getTime();
+            const daysSinceLastCheck = (now - lastCheck) / (1000 * 60 * 60 * 24);
+
+            if (daysSinceLastCheck > 7) {
+                const changes = [];
+                
+                // Simular mudança de preço (20% de chance)
+                if (Math.random() < 0.2) {
+                    const reduction = Math.floor(Math.random() * 10) + 1;
+                    changes.push(`Preço reduzido em ${reduction}%`);
+                }
+                
+                // Simular outras mudanças
+                if (Math.random() < 0.1) {
+                    changes.push('Status alterado');
+                }
+
+                if (changes.length > 0) {
+                    return `
+                        <div class="changes-badge">
+                            ${changes[0]}
+                        </div>
+                    `;
+                }
+            }
+            
+            return '';
+        }
+
+        function updateNotes(propertyId, notes) {
+            const propertyIndex = matches.findIndex(p => p.id === propertyId);
+            if (propertyIndex !== -1) {
+                matches[propertyIndex].notes = notes;
+                matches[propertyIndex].lastUpdate = new Date().toISOString();
+                localStorage.setItem('matches', JSON.stringify(matches));
+            }
+        }
+
+        function updateRating(propertyId, rating) {
+            const propertyIndex = matches.findIndex(p => p.id === propertyId);
+            if (propertyIndex !== -1) {
+                matches[propertyIndex].rating = rating;
+                matches[propertyIndex].lastUpdate = new Date().toISOString();
+                localStorage.setItem('matches', JSON.stringify(matches));
+                renderMatches();
+            }
+        }
+
+        function sortMatches(type) {
+            sortType = type;
+            document.querySelectorAll('.sort-button').forEach(button => {
+                button.classList.toggle('active', button.textContent.toLowerCase().includes(type));
+            });
+
+            const sortedMatches = [...matches].sort((a, b) => {
+                switch (type) {
+                    case 'match':
+                        return b.match - a.match;
+                    case 'rating':
+                        return (b.rating || 0) - (a.rating || 0);
+                    case 'price':
+                        const priceA = parseInt(a.price.replace(/\D/g, ''));
+                        const priceB = parseInt(b.price.replace(/\D/g, ''));
+                        return priceA - priceB;
+                    case 'date':
+                        return new Date(b.lastUpdate || b.addedAt) - new Date(a.lastUpdate || a.addedAt);
+                    default:
+                        return 0;
+                }
+            });
+
+            renderMatches(sortedMatches);
+        }
+
+        function renderMatches(propertiesToRender = matches) {
             const matchesGrid = document.getElementById('matches-grid');
             
-            if (matches.length === 0) {
+            if (propertiesToRender.length === 0) {
                 matchesGrid.innerHTML = `
                     <div class="empty-state">
                         <h3>Nenhum match encontrado ainda</h3>
@@ -174,26 +357,44 @@
                 return;
             }
 
-            matchesGrid.innerHTML = matches.map(property => `
+            matchesGrid.innerHTML = propertiesToRender.map(property => `
                 <div class="property-card">
                     <div class="match-badge">${property.match}% match</div>
+                    ${checkForChanges(property)}
                     <img src="${property.image}" alt="${property.title}" class="property-image">
                     <div class="property-content">
                         <h3 class="property-title">${property.title}</h3>
                         <p class="property-price">${property.price}</p>
+                        <div class="rating-section">
+                            <span>Seu interesse:</span>
+                            <div class="rating-stars">
+                                ${[1, 2, 3, 4, 5].map(star => `
+                                    <button class="star-button" 
+                                            onclick="updateRating('${property.id}', ${star})">
+                                        ${star <= (property.rating || 0) ? '★' : '☆'}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
                         <div class="property-features">
                             ${property.features.map(feature => `
                                 <span class="feature-tag">${feature}</span>
                             `).join('')}
                         </div>
-                        <div class="property-card-buttons">
-                            <button class="card-button view-button" 
+                        <div class="notes-section">
+                            <label class="form-label">Suas anotações:</label>
+                            <textarea class="notes-input"
+                                      placeholder="Adicione suas observações sobre este imóvel"
+                                      onchange="updateNotes('${property.id}', this.value)">${property.notes || ''}</textarea>
+                        </div>
+                        <div class="card-actions">
+                            <button class="button button-primary" 
                                     onclick="viewDetails('${property.id}')">
                                 Ver detalhes
                             </button>
-                            <button class="card-button contact-button" 
-                                    onclick="contactProperty('${property.id}')">
-                                Contatar
+                            <button class="button button-secondary" 
+                                    onclick="shareProperty('${property.id}')">
+                                Compartilhar
                             </button>
                         </div>
                     </div>
@@ -209,19 +410,255 @@
             }
         }
 
-        function contactProperty(propertyId) {
-            // Implementar lógica de contato
-            alert('Funcionalidade de contato em desenvolvimento');
+        function shareProperty(propertyId) {
+            const property = matches.find(p => p.id === propertyId);
+            if (!property) return;
+
+            // Criar texto para compartilhamento
+            const shareText = `
+				🏠 ${property.title}
+				💰 ${property.price}
+				✨ Match: ${property.match}%
+
+				${property.features.join(' • ')}
+
+				Veja mais detalhes em Modulari!
+				`.trim();
+
+            // Verificar se a API de compartilhamento está disponível
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Imóvel encontrado no Modulari',
+                    text: shareText,
+                    url: window.location.origin + '/property-details.html?id=' + property.id
+                }).catch(err => {
+                    console.error('Erro ao compartilhar:', err);
+                    copyToClipboard(shareText);
+                });
+            } else {
+                copyToClipboard(shareText);
+            }
         }
 
-        function showScheduleModal() {
-            // Implementar modal de agendamento
-            alert('Funcionalidade de agendamento em desenvolvimento');
+        function copyToClipboard(text) {
+            // Criar elemento temporário
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            
+            // Copiar o texto
+            textarea.select();
+            document.execCommand('copy');
+            
+            // Remover elemento temporário
+            document.body.removeChild(textarea);
+            
+            alert('Informações copiadas para a área de transferência!');
         }
 
-        // Inicializar página
-        updateStats();
-        renderMatches();
+        function exportMatchesAsPDF() {
+            alert('Funcionalidade de exportação em desenvolvimento.\nEm breve você poderá exportar seus matches em PDF!');
+            // Aqui você implementaria a geração real do PDF
+            // Usando bibliotecas como jsPDF ou similar
+        }
+
+        function compareProperties() {
+            const selectedProperties = matches.filter(p => p.rating >= 4);
+            if (selectedProperties.length < 2) {
+                alert('Selecione pelo menos 2 imóveis com 4 ou 5 estrelas para comparar!');
+                return;
+            }
+
+            // Salvar propriedades selecionadas para comparação
+            localStorage.setItem('compareProperties', JSON.stringify(selectedProperties));
+            window.location.href = 'compare.html';
+        }
+
+        function initializePage() {
+            // Atualizar estatísticas
+            updateStats();
+            
+            // Renderizar matches iniciais
+            sortMatches('match');
+
+            // Verificar se há novas mudanças a cada 24h
+            const lastCheck = localStorage.getItem('lastMatchesCheck');
+            const now = new Date().getTime();
+            
+            if (!lastCheck || (now - parseInt(lastCheck)) > 24 * 60 * 60 * 1000) {
+                matches.forEach(property => {
+                    property.lastCheck = now;
+                });
+                localStorage.setItem('matches', JSON.stringify(matches));
+                localStorage.setItem('lastMatchesCheck', now.toString());
+            }
+        }
+
+        initializePage();
+    </script>
+
+    <!-- Modal de Comparação -->
+    <div class="modal" id="compareModal" style="display: none;">
+        <div class="modal-content">
+            <h3 class="modal-title">Comparar Imóveis</h3>
+            <p class="text-body">Compare imóveis com 4 ou 5 estrelas:</p>
+            <div class="selected-properties" id="selectedProperties">
+                <!-- Lista de imóveis selecionados será inserida aqui -->
+            </div>
+            <div class="modal-actions">
+                <button class="button button-primary" onclick="compareProperties()">
+                    Comparar
+                </button>
+                <button class="button button-secondary" onclick="closeModal('compareModal')">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Compartilhamento -->
+    <div class="modal" id="shareModal" style="display: none;">
+        <div class="modal-content">
+            <h3 class="modal-title">Compartilhar Matches</h3>
+            <p class="text-body">Escolha como deseja compartilhar:</p>
+            <div class="share-options">
+                <button class="button button-primary" onclick="exportMatchesAsPDF()">
+                    Exportar como PDF
+                </button>
+                <button class="button button-secondary" onclick="window.print()">
+                    Imprimir
+                </button>
+            </div>
+            <div class="modal-actions">
+                <button class="button button-secondary" onclick="closeModal('shareModal')">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast para Notificações -->
+    <div class="toast" id="toast" style="display: none;">
+        <span id="toastMessage"></span>
+    </div>
+
+    <style>
+        /* Estilos para elementos adicionais */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--primary);
+        }
+
+        .selected-properties {
+            margin: var(--spacing-md) 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .share-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin: var(--spacing-md) 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: var(--spacing-lg);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: var(--surface);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media print {
+            .header,
+            .matches-summary,
+            .sort-options,
+            .card-actions,
+            .notes-section,
+            .modal,
+            .toast {
+                display: none !important;
+            }
+
+            .property-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: var(--spacing-lg);
+            }
+        }
+    </style>
+
+    <script>
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.style.display = 'block';
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300);
+            }, duration);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Adicionar listeners para fechar modais quando clicar fora
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>
