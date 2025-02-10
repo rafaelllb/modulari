@@ -478,6 +478,22 @@
     </div>
 	
 	<script>
+        const showToast = (message, type = 'success') => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <span class="toast-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</span>
+            <span class="toast-message">${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+        };
         // Verificar se há um perfil ativo
         const activeProfile = JSON.parse(localStorage.getItem('activeProfile'));
         if (!activeProfile) {
@@ -728,6 +744,23 @@
 			}))
 			.sort((a, b) => b.match - a.match);
 
+        function createSkeletonCard() {
+            return `
+                <div class="property-card">
+                <div class="skeleton" style="height: 300px;"></div>
+                <div class="property-content">
+                    <div class="skeleton" style="height: 24px; width: 80%; margin-bottom: 8px;"></div>
+                    <div class="skeleton" style="height: 18px; width: 60%; margin-bottom: 16px;"></div>
+                    <div class="property-features">
+                    ${Array(3).fill().map(() => `
+                        <div class="skeleton" style="height: 24px; width: 80px; border-radius: 12px;"></div>
+                    `).join('')}
+                    </div>
+                </div>
+                </div>
+            `;
+        }
+
 		function generatePersonalizedTips(property) {
 			const tips = [];
 			
@@ -862,31 +895,39 @@
         }
 
         function handleChoice(liked) {
-            const currentCard = document.querySelector('.property-card');
-            if (!currentCard) return;
+            try {
+                const currentCard = document.querySelector('.property-card');
+                if (!currentCard) return;
 
-            const currentProperty = properties[currentIndex];
+                const currentProperty = properties[currentIndex];
 
-            const direction = liked ? 1 : -1;
-            currentCard.style.transform = `translateX(${direction * window.innerWidth}px) rotate(${direction * 30}deg)`;
-            
-            if (liked && currentProperty) {
-                saveMatch(currentProperty);
-                matchesCount++;
-                document.getElementById('matches-count').textContent = `${matchesCount} matches`;
-            }
-
-            setTimeout(() => {
-                currentCard.remove();
-                currentIndex++;
+                const direction = liked ? 1 : -1;
+                currentCard.style.transform = `translateX(${direction * window.innerWidth}px) rotate(${direction * 30}deg)`;
                 
-                if (currentIndex < properties.length) {
-                    const newCard = createPropertyCard(properties[currentIndex]);
-                    document.getElementById('card-stack').appendChild(newCard);
+                if (liked && currentProperty) {
+                    saveMatch(currentProperty);
+                    matchesCount++;
+                    document.getElementById('matches-count').textContent = `${matchesCount} matches`;
+                    showToast('Imóvel adicionado aos seus matches!');
                 } else {
-                    showMatchesModal();
+                    showToast('Imóvel descartado', 'warning');
                 }
-            }, 300);
+
+                setTimeout(() => {
+                    currentCard.remove();
+                    currentIndex++;
+                    
+                    if (currentIndex < properties.length) {
+                        const newCard = createPropertyCard(properties[currentIndex]);
+                        document.getElementById('card-stack').appendChild(newCard);
+                    } else {
+                        showMatchesModal();
+                    }
+                }, 300);
+            } catch (error) {
+                showToast('Erro ao processar sua escolha', 'error');
+                console.error('Erro:', error);
+            }
         }
 
         function showMatchesModal() {
@@ -906,10 +947,33 @@
         document.getElementById('matches-count').textContent = `${matchesCount} matches`;
 
         // Inicializar primeiro card
-        if (properties.length > 0) {
-            const firstCard = createPropertyCard(properties[0]);
-            document.getElementById('card-stack').appendChild(firstCard);
-        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            const cardStack = document.getElementById('card-stack');
+            cardStack.innerHTML = createSkeletonCard();
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                if (properties.length > 0) {
+                const firstCard = createPropertyCard(properties[0]);
+                cardStack.innerHTML = '';
+                cardStack.appendChild(firstCard);
+                } else {
+                cardStack.innerHTML = `
+                    <div class="empty-state">
+                    <div class="empty-state-icon">🏠</div>
+                    <h3>Nenhum imóvel encontrado</h3>
+                    <p>Tente ajustar suas preferências</p>
+                    </div>
+                `;
+                }
+            } catch (error) {
+                showToast('Erro ao carregar imóveis', 'error');
+                console.error('Erro:', error);
+            }
+        });
     </script>
+
+    <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
