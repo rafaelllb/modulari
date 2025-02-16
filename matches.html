@@ -15,9 +15,16 @@
             box-shadow: var(--shadow-sm);
         }
 
+        .matches-grid {
+            display: grid;
+            gap: var(--spacing-md);
+            grid-template-columns: 1fr;
+        }
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            /*grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));*/
+            grid-template-columns: repeat(2, 1fr);
             gap: var(--spacing-md);
             margin-top: var(--spacing-md);
         }
@@ -48,11 +55,18 @@
             box-shadow: var(--shadow-sm);
             transition: transform 0.2s, box-shadow 0.2s;
             margin-bottom: var(--spacing-md);
+            min-height: 300px;
         }
 
         .property-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-md);
+        }
+
+        .property-card.loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
         }
 
         .match-badge {
@@ -160,6 +174,9 @@
             display: flex;
             gap: var(--spacing-sm);
             margin-bottom: var(--spacing-md);
+            overflow-x: auto;
+            padding-bottom: var(--spacing-sm);
+            -webkit-overflow-scrolling: touch;
         }
 
         .sort-button {
@@ -182,6 +199,29 @@
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .sort-button {
+                white-space: nowrap;
+                flex: 0 0 auto;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .matches-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .matches-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
@@ -647,8 +687,42 @@
             }, duration);
         }
 
+        function showMatchesLoading() {
+            const grid = document.getElementById('matches-grid');
+            grid.innerHTML = Array(6).fill().map(() => `
+                <div class="property-card loading">
+                <div style="height: 200px;"></div>
+                </div>
+            `).join('');
+        }
+
+        function showEmptyState() {
+            const grid = document.getElementById('matches-grid');
+            grid.innerHTML = `
+                <div class="empty-state">
+                <h3>Nenhum match encontrado</h3>
+                <p>Continue explorando para encontrar o imóvel ideal</p>
+                <button onclick="window.location.href='property-cards.html'" 
+                        class="button button-primary mt-4">
+                    Explorar imóveis
+                </button>
+                </div>
+            `;
+        }
+
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function initializePage() {
+            showMatchesLoading();
+            try {
+                await new Promise(resolve => setTimeout(resolve, 800));
+                updateStats();
+                sortMatches('match');
+            } catch (error) {
+                showEmptyState();
+            }
         }
 
         // Adicionar listeners para fechar modais quando clicar fora

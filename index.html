@@ -240,10 +240,46 @@
             display: none;
         }
 
+        .lifestyle-card.loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            min-height: 300px;
+        }
+
+        .benefits-grid {
+            grid-template-columns: 1fr;
+        }
+
         @media (max-width: 768px) {
             .profiles-button {
                 padding: 8px 12px;
                 font-size: 0.875rem;
+            }
+
+            .hero-section {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .lifestyle-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 640px) {
+            .benefits-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .benefits-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>

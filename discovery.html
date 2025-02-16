@@ -32,8 +32,9 @@
 
         .choices-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-md);
+            /*grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));*/
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
             margin: var(--spacing-lg) 0;
         }
 
@@ -44,6 +45,13 @@
             overflow: hidden;
             transition: transform 0.2s;
             box-shadow: var(--shadow-sm);
+            min-height: 180px;
+        }
+
+        .choice-card.loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
         }
 
         .choice-card:hover {
@@ -120,6 +128,38 @@
             display: flex;
             align-items: center;
             gap: var(--spacing-xs);
+        }
+
+        @media (min-width: 640px) {
+            .choices-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .choices-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+
+        .question-container {
+            min-height: 400px;
+        }
+
+        @media (max-width: 640px) {
+            .navigation-buttons {
+                flex-direction: column;
+            }
+            
+            .button {
+                width: 100%;
+                margin-bottom: var(--spacing-xs);
+            }
         }
     </style>
 </head>
@@ -206,6 +246,17 @@
         let currentQuestion = 0;
         const answers = {};
         
+        function showLoading() {
+            const container = document.getElementById('question-container');
+            container.innerHTML = `
+                <div class="choices-grid">
+                ${Array(4).fill().map(() => `
+                    <div class="choice-card loading"></div>
+                `).join('')}
+                </div>
+            `;
+        }
+
         function renderQuestion() {
             const question = questions[currentQuestion];
             const container = document.getElementById('question-container');
@@ -332,6 +383,29 @@
 			// Definir como perfil ativo
 			localStorage.setItem('activeProfile', JSON.stringify(newProfile));
 		}
+
+        function showError(message) {
+            const container = document.getElementById('question-container');
+            container.innerHTML = `
+                <div class="empty-state">
+                <h3>Erro ao carregar questão</h3>
+                <p>${message}</p>
+                <button onclick="location.reload()" class="button button-primary mt-4">
+                    Tentar novamente
+                </button>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoading();
+            try {
+                await new Promise(resolve => setTimeout(resolve, 800));
+                renderQuestion();
+            } catch (error) {
+                showError('Não foi possível carregar as questões');
+            }
+        });
 
         // Iniciar com a primeira questão
         renderQuestion();
