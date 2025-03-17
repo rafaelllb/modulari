@@ -428,68 +428,23 @@
         import dataService from './data-service.js';
         import permissionService from './permission-service.js';
         import toastService from './toast-service.js';
-
         import { renderHeader } from './header-component.js';
 
-        document.addEventListener('DOMContentLoaded', function() {
-            renderHeader('header-container');
-		
-		// Export function to global scope
+        // Export function to global scope
         window.selectLifestyle = function(lifestyle) {
             dataService.saveSelectedLifestyle(lifestyle);
             window.location.href = 'discovery.html';
         };
-        
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Show loading state
-            showLoadingLifestyles();
-            
-            try {
-                // Check if user is authenticated
-                if (permissionService.isAuthenticated()) {
-                    updateUIForAuthenticatedUser();
-                    
-                    // If the token needs renewal, attempt it
-                    if (permissionService.needsTokenRefresh()) {
-                        await permissionService.refreshToken();
-                    }
-                } else {
-                    // Show login button if not authenticated
-                    const authButtons = document.getElementById('auth-buttons');
-                    if (authButtons) {
-                        authButtons.innerHTML = `
-                            <button class="button button-secondary" onclick="window.location.href='login.html'">
-                                Entrar
-                            </button>
-                        `;
-                    }
-                }
-                
-                // Check for saved profiles regardless of authentication
-                checkSavedProfiles();
-                
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 600));
-                
-                // Render lifestyle options
-                renderLifestyleOptions();
-            } catch (error) {
-                console.error('Error initializing application:', error);
-                document.getElementById('lifestyle-grid').innerHTML = 
-                    '<div class="error-state">Erro ao carregar estilos de vida</div>';
-                toastService.error('Erro ao inicializar a aplicação');
-            }
-        });        
-        // Show loading state for lifestyle cards
-        function showLoadingLifestyles() {
+
+        // Funções que precisam estar no escopo global
+        window.showLoadingLifestyles = function() {
             const lifestyleGrid = document.getElementById('lifestyle-grid');
             lifestyleGrid.innerHTML = Array(3).fill().map(() => `
                 <div class="lifestyle-card loading"></div>
             `).join('');
         }
-        
-        // Render lifestyle options
-        function renderLifestyleOptions() {
+
+        window.renderLifestyleOptions = function() {
             const lifestyleGrid = document.getElementById('lifestyle-grid');
             
             const lifestyles = [
@@ -529,8 +484,43 @@
                 </div>
             `).join('');
         }
-        
-        // Function to check for saved profiles
+
+        // Apenas um evento DOMContentLoaded principal
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Renderizar o cabeçalho
+                renderHeader('header-content');
+                
+                // Mostrar estado de carregamento
+                showLoadingLifestyles();
+                
+                // Verificar autenticação e atualizar UI
+                if (permissionService.isAuthenticated()) {
+                    updateUIForAuthenticatedUser();
+                    
+                    if (permissionService.needsTokenRefresh()) {
+                        await permissionService.refreshToken();
+                    }
+                }
+                
+                // Verificar perfis salvos
+                checkSavedProfiles();
+                
+                // Simular atraso da API
+                await new Promise(resolve => setTimeout(resolve, 600));
+                
+                // Renderizar cards de lifestyle
+                renderLifestyleOptions();
+                
+            } catch (error) {
+                console.error('Erro ao inicializar aplicação:', error);
+                document.getElementById('lifestyle-grid').innerHTML = 
+                    '<div class="error-state">Erro ao carregar estilos de vida</div>';
+                toastService.error('Erro ao inicializar a aplicação');
+            }
+        });
+
+        // Função para verificar perfis salvos
         function checkSavedProfiles() {
             const profilesButton = document.getElementById('profilesButton');
             const profiles = dataService.getBuyerProfiles();
@@ -541,16 +531,16 @@
                 profilesButton.classList.remove('visible');
             }
         }
-        
-        // Function to update UI for authenticated users
+
+        // Função para atualizar UI para usuários autenticados
         function updateUIForAuthenticatedUser() {
             const user = permissionService.getCurrentUser();
             if (!user) return;
             
-            // Example: Update header to show user information
+            // Atualizar cabeçalho para mostrar informações do usuário
             const headerContent = document.querySelector('.header-content');
             
-            // Check if user menu already exists to avoid duplication
+            // Verificar se o menu do usuário já existe para evitar duplicação
             if (!document.getElementById('user-menu')) {
                 const profilesButton = document.getElementById('profilesButton');
                 if (profilesButton) {
@@ -575,7 +565,7 @@
                 
                 headerContent.insertAdjacentHTML('beforeend', userMenuHtml);
                 
-                // Add event listener for logout button
+                // Adicionar event listener para botão de logout
                 document.getElementById('logout-button').addEventListener('click', (e) => {
                     e.preventDefault();
                     permissionService.logout();
@@ -586,7 +576,7 @@
                     document.querySelector('.user-dropdown').classList.toggle('active');
                 });
                 
-                // Close dropdown when clicking outside
+                // Fechar dropdown ao clicar fora
                 document.addEventListener('click', (e) => {
                     const userMenu = document.getElementById('user-menu');
                     if (userMenu && !userMenu.contains(e.target)) {
