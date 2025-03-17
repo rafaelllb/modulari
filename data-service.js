@@ -622,7 +622,7 @@ class DataService {
       profileId,
       notes: '',
       rating: 0,
-      match: this.calculateMatchScore(property, this.getProfileById(profileId)?.preferences || {})
+      match: this.calculateMatchScore(property, this.getSearchProfileById(profileId)?.preferences || {})
     };
     
     matches.push(match);
