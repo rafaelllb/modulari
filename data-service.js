@@ -186,93 +186,266 @@ class DataService {
    * @param {Object} preferences - Preferências do usuário
    * @returns {number} Score de match (0-100)
    */
-  calculateMatchScore(property, preferences) {
-    let score = 0;
+  function calculateMatchScore(property, preferences) {
+    if (!preferences) return 50; // Default score if no preferences are provided
     
-    if (!preferences) return 50; // Score padrão se não houver preferências
+    // Define scoring weights for different factors
+    const WEIGHTS = {
+      PURPOSE: 25,      // Purpose alignment (live/invest/both)
+      LIFESTYLE: 20,    // Lifestyle compatibility
+      PRIORITIES: 30,   // User's stated priorities
+      SURROUNDINGS: 20, // Preferred surroundings
+      BONUS: 5          // Bonus for exceptional matches
+    };
     
-    // Avalia propósito (morar, investir, ambos)
+    let scores = {
+      purpose: 0,
+      lifestyle: 0,
+      priorities: 0,
+      surroundings: 0,
+      bonus: 0
+    };
+    
+    // 1. Evaluate purpose alignment (live, invest, both)
     if (preferences.purpose) {
-      if (preferences.purpose === 'invest' && property.details.investmentPotential) {
-        score += 25;
-      }
-      if (preferences.purpose === 'live' && property.features.includes('Área tranquila')) {
-        score += 25;
-      }
-      if (preferences.purpose === 'both' && 
-          property.details.investmentPotential && 
-          property.features.includes('Área tranquila')) {
-        score += 25;
+      if (preferences.purpose === 'invest') {
+        // Investment potential factors
+        if (property.details.investmentPotential) {
+          scores.purpose += WEIGHTS.PURPOSE;
+          
+          // Additional factors for investment
+          if (property.features.includes('Alto potencial de valorização')) {
+            scores.purpose += 5;
+          }
+          if (property.details.location.includes('Centro') || 
+              property.details.location.includes('Primeira quadra')) {
+            scores.purpose += 5;
+          }
+        }
+      } 
+      else if (preferences.purpose === 'live') {
+        // Living comfort factors
+        if (property.features.includes('Área tranquila')) {
+          scores.purpose += WEIGHTS.PURPOSE * 0.7;
+        }
+        if (property.features.includes('Condomínio fechado') || 
+            property.features.includes('Segurança')) {
+          scores.purpose += WEIGHTS.PURPOSE * 0.3;
+        }
+      } 
+      else if (preferences.purpose === 'both') {
+        // Balance between living and investment
+        let investScore = 0;
+        let liveScore = 0;
+        
+        // Investment factors
+        if (property.details.investmentPotential) {
+          investScore += WEIGHTS.PURPOSE / 2;
+        }
+        
+        // Living factors
+        if (property.features.includes('Área tranquila')) {
+          liveScore += WEIGHTS.PURPOSE / 2;
+        }
+        
+        scores.purpose = investScore + liveScore;
       }
     }
-
-    // Avalia estilo de vida (tranquilo, ativo, balanceado)
+    
+    // 2. Evaluate lifestyle compatibility (quiet, active, balanced)
     if (preferences.lifestyle) {
-      if (preferences.lifestyle === 'quiet' && 
-          (property.details.noiseLevel === 'low' || property.details.noiseLevel === 'very_low')) {
-        score += 20;
-      }
-      if (preferences.lifestyle === 'active' && property.details.nearActivities) {
-        score += 20;
-      }
-      if (preferences.lifestyle === 'balanced') {
-        // Estilo balanceado obtém pontuação média entre os extremos
-        score += 10;
+      if (preferences.lifestyle === 'quiet') {
+        // Noise level evaluation for quiet preference
+        const noiseMap = {
+          'very_low': 1.0,
+          'low': 0.8,
+          'medium': 0.4,
+          'high': 0.1
+        };
+        
+        const noiseFactor = noiseMap[property.details.noiseLevel] || 0.5;
+        scores.lifestyle += WEIGHTS.LIFESTYLE * noiseFactor;
+        
+        // Additional quiet factors
+        if (property.features.includes('Área verde') || 
+            property.features.includes('Varanda')) {
+          scores.lifestyle += 5;
+        }
+      } 
+      else if (preferences.lifestyle === 'active') {
+        // Activity proximity for active preference
+        if (property.details.nearActivities) {
+          scores.lifestyle += WEIGHTS.LIFESTYLE * 0.8;
+        }
+        
+        // Check for specific active lifestyle features
+        const activeFeatures = [
+          'Próximo ao centro', 'Academia', 'Próximo a comércios', 
+          'Piscina', 'Área de lazer'
+        ];
+        
+        const matchedFeatures = property.features.filter(feature => 
+          activeFeatures.some(activeFeature => 
+            feature.toLowerCase().includes(activeFeature.toLowerCase())
+          )
+        );
+        
+        scores.lifestyle += (matchedFeatures.length / activeFeatures.length) * WEIGHTS.LIFESTYLE * 0.2;
+      } 
+      else if (preferences.lifestyle === 'balanced') {
+        // Balance between quiet and active
+        let quietScore = 0;
+        let activeScore = 0;
+        
+        // Quiet factors (reduced weight)
+        const noiseFactor = property.details.noiseLevel === 'low' ? 0.8 : 
+                           property.details.noiseLevel === 'medium' ? 0.5 : 0.3;
+        quietScore = WEIGHTS.LIFESTYLE * 0.5 * noiseFactor;
+        
+        // Active factors (reduced weight)
+        if (property.details.nearActivities) {
+          activeScore = WEIGHTS.LIFESTYLE * 0.5 * 0.8;
+        }
+        
+        scores.lifestyle = quietScore + activeScore;
+        
+        // Bonus for truly balanced properties
         if (property.features.includes('Próximo ao centro') && 
             property.features.includes('Área tranquila')) {
-          score += 10;
+          scores.lifestyle += 5;
         }
       }
     }
-
-    // Avalia prioridades (espaço, localização, privacidade, comodidades)
-    if (preferences.priorities) {
-      const size = parseInt(property.features.find(f => f.includes('m²'))?.replace(/\D/g, '') || '0');
+    
+    // 3. Evaluate priorities (space, location, privacy, amenities)
+    if (preferences.priorities && preferences.priorities.length > 0) {
+      const priorityWeight = WEIGHTS.PRIORITIES / preferences.priorities.length;
       
-      if (preferences.priorities.includes('space') && size > 150) {
-        score += 15;
+      if (preferences.priorities.includes('space')) {
+        // Extract size from features (e.g., "200m²")
+        const sizeFeature = property.features.find(f => f.includes('m²'));
+        const size = sizeFeature ? parseInt(sizeFeature.replace(/\D/g, '')) : 0;
+        
+        // Score based on size brackets
+        if (size > 200) scores.priorities += priorityWeight;
+        else if (size > 150) scores.priorities += priorityWeight * 0.8;
+        else if (size > 100) scores.priorities += priorityWeight * 0.6;
+        else if (size > 50) scores.priorities += priorityWeight * 0.4;
+        else scores.priorities += priorityWeight * 0.2;
       }
-      if (preferences.priorities.includes('location') && 
-          (property.details.location.includes('Primeira quadra') || 
-           property.details.location.includes('Centro'))) {
-        score += 15;
+      
+      if (preferences.priorities.includes('location')) {
+        // Premium locations
+        if (property.details.location.includes('Primeira quadra') || 
+            property.details.location.includes('Jardins') || 
+            property.details.location.includes('Centro')) {
+          scores.priorities += priorityWeight;
+        }
+        // Good locations
+        else if (property.details.location.includes('Próximo') || 
+                 property.features.includes('Localização estratégica')) {
+          scores.priorities += priorityWeight * 0.7;
+        }
+        // Standard locations
+        else {
+          scores.priorities += priorityWeight * 0.3;
+        }
       }
-      if (preferences.priorities.includes('privacy') && 
-          property.features.includes('Condomínio fechado')) {
-        score += 15;
+      
+      if (preferences.priorities.includes('privacy')) {
+        // Privacy factors
+        if (property.features.includes('Condomínio fechado')) {
+          scores.priorities += priorityWeight;
+        }
+        if (property.details.noiseLevel === 'very_low' || 
+            property.details.noiseLevel === 'low') {
+          scores.priorities += priorityWeight * 0.5;
+        }
+        if (property.features.includes('Andar alto')) {
+          scores.priorities += priorityWeight * 0.3;
+        }
       }
-      if (preferences.priorities.includes('amenities') && 
-          (property.features.includes('Academia') || 
-           property.features.includes('Piscina'))) {
-        score += 15;
+      
+      if (preferences.priorities.includes('amenities')) {
+        // Count amenities
+        const amenities = ['Piscina', 'Academia', 'Área de lazer', 'Varanda gourmet', 
+                         'Segurança 24h', 'Quadra', 'Playground'];
+        
+        const matchedAmenities = property.features.filter(feature => 
+          amenities.some(amenity => 
+            feature.toLowerCase().includes(amenity.toLowerCase())
+          )
+        );
+        
+        scores.priorities += (matchedAmenities.length / 3) * priorityWeight;
       }
     }
-
-    // Avalia arredores (natureza, serviços, lazer, transporte)
-    if (preferences.surrounding) {
-      if (preferences.surrounding.includes('nature') && 
-          (property.features.includes('Área verde') || 
-           property.features.includes('Vista para o mar'))) {
-        score += 15;
+    
+    // 4. Evaluate surroundings (nature, services, leisure, transport)
+    if (preferences.surrounding && preferences.surrounding.length > 0) {
+      const surroundingWeight = WEIGHTS.SURROUNDINGS / preferences.surrounding.length;
+      
+      if (preferences.surrounding.includes('nature')) {
+        if (property.features.includes('Área verde') || 
+            property.features.includes('Vista para o mar') || 
+            property.features.includes('Pomar') || 
+            property.features.includes('Lago')) {
+          scores.surroundings += surroundingWeight;
+        }
       }
-      if (preferences.surrounding.includes('services') && 
-          property.features.includes('Próximo a comércios')) {
-        score += 15;
+      
+      if (preferences.surrounding.includes('services')) {
+        if (property.features.includes('Próximo a comércios') || 
+            property.details.location.includes('Centro') || 
+            property.features.includes('Próximo ao centro')) {
+          scores.surroundings += surroundingWeight;
+        }
       }
-      if (preferences.surrounding.includes('leisure') && 
-          (property.features.includes('Piscina') || 
-           property.features.includes('Varanda gourmet'))) {
-        score += 15;
+      
+      if (preferences.surrounding.includes('leisure')) {
+        const leisureFeatures = ['Piscina', 'Varanda gourmet', 'Praia', 'Área de lazer'];
+        
+        const matchedFeatures = property.features.filter(feature => 
+          leisureFeatures.some(leisure => 
+            feature.toLowerCase().includes(leisure.toLowerCase())
+          )
+        );
+        
+        scores.surroundings += (matchedFeatures.length / leisureFeatures.length) * surroundingWeight;
       }
-      if (preferences.surrounding.includes('transport') && 
-          property.details.location.includes('Centro')) {
-        score += 15;
+      
+      if (preferences.surrounding.includes('transport')) {
+        if (property.details.location.includes('Centro') || 
+            property.features.includes('Próximo ao centro')) {
+          scores.surroundings += surroundingWeight;
+        }
       }
     }
-
-    // Limita o score a 100
-    return Math.min(Math.round(score), 100);
+    
+    // 5. Bonus for exceptional matches
+    // Perfect lifestyle match
+    if (preferences.lifestyle === 'quiet' && property.details.noiseLevel === 'very_low') {
+      scores.bonus += WEIGHTS.BONUS * 0.3;
+    }
+    
+    // Highly desirable features match
+    const uniqueFeatures = ['Vista para o mar', 'Primeira quadra do mar', 'Alto padrão', 'Piscina'];
+    
+    const matchedUniqueFeatures = property.features.filter(feature => 
+      uniqueFeatures.some(unique => 
+        feature.toLowerCase().includes(unique.toLowerCase())
+      )
+    );
+    
+    scores.bonus += (matchedUniqueFeatures.length / uniqueFeatures.length) * WEIGHTS.BONUS * 0.7;
+    
+    // Calculate final score (sum of all categories)
+    const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0);
+    
+    // Normalize to 0-100 range and round
+    return Math.min(Math.round(totalScore), 100);
   }
+  
 
   /**
    * Cria um novo perfil de busca

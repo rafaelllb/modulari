@@ -484,8 +484,6 @@
                 </div>
             `).join('');
         }
-
-        // Apenas um evento DOMContentLoaded principal
         document.addEventListener('DOMContentLoaded', async function() {
             try {
                 // Renderizar o cabeçalho
@@ -503,8 +501,14 @@
                     }
                 }
                 
-                // Verificar perfis salvos
-                checkSavedProfiles();
+                // Make sure the profilesButton exists before we try to use it
+                const profilesButton = document.getElementById('profilesButton');
+                if (profilesButton) {
+                    // Verificar perfis salvos
+                    checkSavedProfiles();
+                } else {
+                    console.warn('profilesButton element not found, skipping profile check');
+                }
                 
                 // Simular atraso da API
                 await new Promise(resolve => setTimeout(resolve, 600));
@@ -514,8 +518,11 @@
                 
             } catch (error) {
                 console.error('Erro ao inicializar aplicação:', error);
-                document.getElementById('lifestyle-grid').innerHTML = 
-                    '<div class="error-state">Erro ao carregar estilos de vida</div>';
+                const lifestyleGrid = document.getElementById('lifestyle-grid');
+                if (lifestyleGrid) {
+                    lifestyleGrid.innerHTML = 
+                        '<div class="error-state">Erro ao carregar estilos de vida</div>';
+                }
                 toastService.error('Erro ao inicializar a aplicação');
             }
         });
@@ -523,12 +530,18 @@
         // Função para verificar perfis salvos
         function checkSavedProfiles() {
             const profilesButton = document.getElementById('profilesButton');
-            const profiles = dataService.getBuyerProfiles();
             
-            if (profiles.length > 0) {
-                profilesButton.classList.add('visible');
+            // Add null check before accessing classList
+            if (profilesButton) {
+                const profiles = dataService.getBuyerProfiles();
+                
+                if (profiles.length > 0) {
+                    profilesButton.classList.add('visible');
+                } else {
+                    profilesButton.classList.remove('visible');
+                }
             } else {
-                profilesButton.classList.remove('visible');
+                console.warn('profilesButton element not found');
             }
         }
 
