@@ -160,15 +160,22 @@
             Email ou senha incorretos. Por favor, tente novamente.
         </div>
         
+        <!-- Demo credentials notification -->
+        <div class="demo-credentials" style="background: rgba(59, 130, 246, 0.1); color: #3B82F6; padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: left; font-size: 0.9rem;">
+            <strong>Credenciais de demonstração:</strong><br>
+            Email: demo@exemplo.com<br>
+            Senha: senha123
+        </div>
+        
         <form class="auth-form" id="login-form">
             <div class="form-group">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" id="email" name="email" class="form-input" required>
+                <input type="email" id="email" name="email" class="form-input" required value="demo@exemplo.com">
             </div>
             
             <div class="form-group">
                 <label for="password" class="form-label">Senha</label>
-                <input type="password" id="password" name="password" class="form-input" required>
+                <input type="password" id="password" name="password" class="form-input" required value="senha123">
                 <div class="remember-me">
                     <input type="checkbox" id="remember" name="remember">
                     <label for="remember">Lembrar de mim</label>
