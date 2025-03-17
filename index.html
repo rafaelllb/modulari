@@ -354,11 +354,14 @@
 <body>
     <div id="toast-container" class="toast-container"></div>
     
-    <header class="header">
+    <header class="header" id="header-content">
         <div class="container header-content">
             <h1 class="logo">Modulari</h1>
             <button id="profilesButton" class="profiles-button" onclick="window.location.href='profiles.html'">
                 Meus Perfis
+            </button>
+            <button class="button button-secondary" onclick="window.location.href='login.html'">
+                Entrar
             </button>
         </div>
     </header>
@@ -425,6 +428,11 @@
         import dataService from './data-service.js';
         import permissionService from './permission-service.js';
         import toastService from './toast-service.js';
+
+        import { renderHeader } from './header-component.js';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHeader('header-container');
 		
 		// Export function to global scope
         window.selectLifestyle = function(lifestyle) {
@@ -445,6 +453,16 @@
                     if (permissionService.needsTokenRefresh()) {
                         await permissionService.refreshToken();
                     }
+                } else {
+                    // Show login button if not authenticated
+                    const authButtons = document.getElementById('auth-buttons');
+                    if (authButtons) {
+                        authButtons.innerHTML = `
+                            <button class="button button-secondary" onclick="window.location.href='login.html'">
+                                Entrar
+                            </button>
+                        `;
+                    }
                 }
                 
                 // Check for saved profiles regardless of authentication
@@ -457,12 +475,11 @@
                 renderLifestyleOptions();
             } catch (error) {
                 console.error('Error initializing application:', error);
-				document.getElementById('lifestyle-grid').innerHTML = 
-					'<div class="error-state">Erro ao carregar estilos de vida</div>';
+                document.getElementById('lifestyle-grid').innerHTML = 
+                    '<div class="error-state">Erro ao carregar estilos de vida</div>';
                 toastService.error('Erro ao inicializar a aplicação');
             }
-        });
-        
+        });        
         // Show loading state for lifestyle cards
         function showLoadingLifestyles() {
             const lifestyleGrid = document.getElementById('lifestyle-grid');

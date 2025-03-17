@@ -165,7 +165,7 @@
 </head>
 <body>
     <div class="container">
-        <header class="header">
+        <header class="header" id="header-content">
             <div class="header-content">
                 <h1 class="logo">Modulari</h1>
             </div>
@@ -198,6 +198,10 @@
     </footer>
 
     <script>
+        import { renderHeader } from './header-component.js';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHeader('header-container');
         const questions = [
             {
                 id: 'purpose',

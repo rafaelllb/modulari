@@ -14,39 +14,47 @@ let isLoading = true;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
-    // Verificar se há um perfil ativo
-    const activeProfile = dataService.getActiveProfile();
+    // Verify if user is authenticated
+    const isAuthenticated = permissionService.isAuthenticated();
+    
+    // Check for active profile either in local or session storage
+    const activeProfile = dataService.getActiveProfile() || 
+                         JSON.parse(sessionStorage.getItem('tempActiveProfile'));
+    
     if (!activeProfile) {
         window.location.href = 'profiles.html';
         return;
     }
 
-    // Mostrar informações do perfil
+    // Show profile info
     renderProfileInfo(activeProfile);
 
-    // Mostrar loading cards
+    // Show loading cards
     showLoadingCards();
 
     try {
-        // Carregar propriedades baseadas no lifestyle
+        // Load properties based on lifestyle
         const lifestyle = activeProfile.lifestyle || 'beach';
         let lifestyleProperties = dataService.getPropertiesByLifestyle(lifestyle);
         
-        // Simular delay da API
+        // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Calcular scores de match e ordenar por match
+        // Calculate match scores and sort by match
         properties = lifestyleProperties.map(property => ({
             ...property,
             match: dataService.calculateMatchScore(property, activeProfile.preferences)
         })).sort((a, b) => b.match - a.match);
         
-        // Carregar matches existentes
-        const matches = dataService.getProfileMatches(activeProfile.id);
+        // Load existing matches
+        const matchStorage = isAuthenticated ? localStorage : sessionStorage;
+        const matchKey = dataService.KEYS.MATCHES_PREFIX + activeProfile.id;
+        const matches = JSON.parse(matchStorage.getItem(matchKey) || '[]');
+        
         matchesCount = matches.length;
         document.getElementById('matches-count').textContent = `${matchesCount} matches`;
         
-        // Renderizar as propriedades
+        // Render properties
         isLoading = false;
         if (currentView === 'cards') {
             renderPropertyCard();
@@ -54,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderPropertyGrid();
         }
     } catch (error) {
-        console.error('Erro ao carregar propriedades:', error);
+        console.error('Error loading properties:', error);
         showError();
     }
 });

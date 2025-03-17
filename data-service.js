@@ -153,7 +153,7 @@ class DataService {
    * @param {Object} preferences - Preferências do usuário
    */
   savePreferences(preferences) {
-    localStorage.setItem(this.KEYS.PREFERENCES, JSON.stringify(preferences));
+    this.setStorageItem(this.KEYS.PREFERENCES, JSON.stringify(preferences));
   }
 
   /**
@@ -161,7 +161,7 @@ class DataService {
    * @returns {Object} Preferências do usuário
    */
   getPreferences() {
-    return JSON.parse(localStorage.getItem(this.KEYS.PREFERENCES) || '{}');
+    return JSON.parse(this.getStorageItem(this.KEYS.PREFERENCES) || '{}');
   }
 
   /**
@@ -169,7 +169,7 @@ class DataService {
    * @param {string} lifestyle - Tipo de lifestyle (beach, city, countryside)
    */
   saveSelectedLifestyle(lifestyle) {
-    localStorage.setItem(this.KEYS.SELECTED_LIFESTYLE, lifestyle);
+    this.setStorageItem(this.KEYS.SELECTED_LIFESTYLE, lifestyle);
   }
 
   /**
@@ -177,7 +177,7 @@ class DataService {
    * @returns {string} Tipo de lifestyle selecionado
    */
   getSelectedLifestyle() {
-    return localStorage.getItem(this.KEYS.SELECTED_LIFESTYLE) || '';
+    return this.getStorageItem(this.KEYS.SELECTED_LIFESTYLE) || '';
   }
 
   /**
@@ -289,9 +289,44 @@ class DataService {
     };
     
     profiles.push(newProfile);
-    localStorage.setItem(this.KEYS.BUYER_PROFILES, JSON.stringify(profiles));
+    this.setStorageItem(this.KEYS.BUYER_PROFILES, JSON.stringify(profiles));
     
     return newProfile;
+  }
+  /**
+   * Determines if we should use localStorage or sessionStorage
+   * @returns {Storage} The appropriate storage object
+   */
+  getStorageType() {
+    // Use localStorage for authenticated users, sessionStorage for others
+    const isAuthenticated = localStorage.getItem('authToken') !== null;
+    return isAuthenticated ? localStorage : sessionStorage;
+  }
+
+  /**
+   * Gets an item from the appropriate storage
+   * @param {string} key - Storage key
+   * @returns {string|null} Stored value
+   */
+  getStorageItem(key) {
+    return this.getStorageType().getItem(key);
+  }
+
+  /**
+   * Sets an item in the appropriate storage
+   * @param {string} key - Storage key
+   * @param {string} value - Value to store
+   */
+  setStorageItem(key, value) {
+    this.getStorageType().setItem(key, value);
+  }
+
+  /**
+   * Removes an item from the appropriate storage
+   * @param {string} key - Storage key
+   */
+  removeStorageItem(key) {
+    this.getStorageType().removeItem(key);
   }
 
   /**
@@ -313,7 +348,7 @@ class DataService {
     };
     
     profiles[index] = updatedProfile;
-    localStorage.setItem(this.KEYS.BUYER_PROFILES, JSON.stringify(profiles));
+    this.setStorageItem(this.KEYS.BUYER_PROFILES, JSON.stringify(profiles));
     
     return updatedProfile;
   }
@@ -329,15 +364,15 @@ class DataService {
     
     if (filteredProfiles.length === profiles.length) return false;
     
-    localStorage.setItem(this.KEYS.BUYER_PROFILES, JSON.stringify(filteredProfiles));
+    this.setStorageItem(this.KEYS.BUYER_PROFILES, JSON.stringify(filteredProfiles));
     
     // Remover matches associados
-    localStorage.removeItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`);
+    this.removeStorageItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`);
     
     // Se for o perfil ativo, remover
     const activeProfile = this.getActiveProfile();
     if (activeProfile && activeProfile.id === profileId) {
-      localStorage.removeItem(this.KEYS.ACTIVE_PROFILE);
+      this.removeStorageItem(this.KEYS.ACTIVE_PROFILE);
     }
     
     return true;
@@ -348,7 +383,7 @@ class DataService {
    * @returns {Array} Array com perfis de busca
    */
   getBuyerProfiles() {
-    return JSON.parse(localStorage.getItem(this.KEYS.BUYER_PROFILES) || '[]');
+    return JSON.parse(this.getStorageItem(this.KEYS.BUYER_PROFILES) || '[]');
   }
 
   /**
@@ -371,7 +406,7 @@ class DataService {
     
     if (!profile) return null;
     
-    localStorage.setItem(this.KEYS.ACTIVE_PROFILE, JSON.stringify(profile));
+    this.setStorageItem(this.KEYS.ACTIVE_PROFILE, JSON.stringify(profile));
     return profile;
   }
 
@@ -380,7 +415,7 @@ class DataService {
    * @returns {Object|null} Perfil ativo
    */
   getActiveProfile() {
-    return JSON.parse(localStorage.getItem(this.KEYS.ACTIVE_PROFILE) || 'null');
+    return JSON.parse(this.getStorageItem(this.KEYS.ACTIVE_PROFILE) || 'null');
   }
 
   /**
@@ -407,7 +442,7 @@ class DataService {
     };
     
     matches.push(match);
-    localStorage.setItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`, JSON.stringify(matches));
+    this.setStorageItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`, JSON.stringify(matches));
     
     return match;
   }
@@ -432,7 +467,7 @@ class DataService {
     };
     
     matches[index] = updatedMatch;
-    localStorage.setItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`, JSON.stringify(matches));
+    this.setStorageItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`, JSON.stringify(matches));
     
     return updatedMatch;
   }
@@ -449,7 +484,7 @@ class DataService {
     
     if (filteredMatches.length === matches.length) return false;
     
-    localStorage.setItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`, JSON.stringify(filteredMatches));
+    this.setStorageItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`, JSON.stringify(filteredMatches));
     return true;
   }
 
@@ -459,7 +494,7 @@ class DataService {
    * @returns {Array} Array com matches
    */
   getProfileMatches(profileId) {
-    return JSON.parse(localStorage.getItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`) || '[]');
+    return JSON.parse(this.getStorageItem(`${this.KEYS.MATCHES_PREFIX}${profileId}`) || '[]');
   }
 
   /**
@@ -467,7 +502,7 @@ class DataService {
    * @param {Object} property - Imóvel
    */
   setCurrentProperty(property) {
-    localStorage.setItem(this.KEYS.CURRENT_PROPERTY, JSON.stringify(property));
+    this.setStorageItem(this.KEYS.CURRENT_PROPERTY, JSON.stringify(property));
   }
 
   /**
@@ -475,7 +510,7 @@ class DataService {
    * @returns {Object|null} Imóvel atual
    */
   getCurrentProperty() {
-    return JSON.parse(localStorage.getItem(this.KEYS.CURRENT_PROPERTY) || 'null');
+    return JSON.parse(this.getStorageItem(this.KEYS.CURRENT_PROPERTY) || 'null');
   }
 }
 

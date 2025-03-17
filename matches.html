@@ -246,7 +246,7 @@
     <div id="toast-container" class="toast-container"></div>
     
     <div class="container">
-        <header class="header">
+        <header class="header" id="header-content>
             <div class="header-content">
                 <h1 class="logo">Modulari</h1>
                 <button class="button button-secondary" onclick="window.location.href='property-cards.html'">
@@ -405,6 +405,11 @@
     </style>
 
     <!-- Load script as module -->
-    <script type="module" src="matches.js"></script>
+    <script type="module" src="matches.js">
+        import { renderHeader } from './header-component.js';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHeader('header-container');
+    </script>
 </body>
 </html>

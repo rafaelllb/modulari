@@ -245,6 +245,9 @@ function saveProfile() {
     dataService.setActiveProfile(createdProfile.id);
     
     toastService.success('Perfil criado com sucesso!');
+    
+    // Redirect to login prompt instead of property cards
+    window.location.href = 'login-prompt.html';
 }
 
 // Export functions to global scope

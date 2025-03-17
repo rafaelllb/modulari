@@ -210,43 +210,34 @@
         });
         
         function authenticateUser(email, password, remember) {
-            // Simulação de autenticação - na implementação real, este seria um fetch para a API
-            fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                    remember
-                }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Falha na autenticação');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Armazenar token JWT
-                localStorage.setItem('authToken', data.token);
-                localStorage.setItem('userId', data.userId);
-                // Redirecionar para a página principal
-                window.location.href = 'index.html';
-            })
-            .catch(error => {
-                document.getElementById('error-message').style.display = 'block';
-                console.error('Erro de autenticação:', error);
-            });
-            
             // TEMPORÁRIO: Para demonstração, vamos simular um login bem-sucedido
             // Em produção, este código seria removido
             if (email === 'demo@exemplo.com' && password === 'senha123') {
                 const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlVzdcOhcmlvIERlbW8iLCJyb2xlIjoidXNlciIsImlhdCI6MTUxNjIzOTAyMn0';
                 localStorage.setItem('authToken', mockToken);
                 localStorage.setItem('userId', '123456');
-                window.location.href = 'index.html';
+                
+                // Check if there's a pending profile from session storage
+                const pendingProfile = sessionStorage.getItem('pendingProfile');
+                if (pendingProfile) {
+                    const profileData = JSON.parse(pendingProfile);
+                    
+                    // Move profile data from session to localStorage
+                    const dataService = window.dataService || {};
+                    if (dataService.createSearchProfile) {
+                        const newProfile = dataService.createSearchProfile(profileData);
+                        dataService.setActiveProfile(newProfile.id);
+                    }
+                    
+                    // Clear session storage
+                    sessionStorage.removeItem('pendingProfile');
+                }
+                
+                // Check for redirect preference
+                const redirect = sessionStorage.getItem('redirectAfterAuth') || 'index.html';
+                sessionStorage.removeItem('redirectAfterAuth');
+                
+                window.location.href = redirect;
             } else {
                 document.getElementById('error-message').style.display = 'block';
             }

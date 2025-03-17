@@ -324,37 +324,41 @@
         });
         
         function registerUser(firstName, lastName, email, password) {
-            // Simulação de registro - na implementação real, este seria um fetch para a API
-            fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    firstName,
-                    lastName,
-                    email,
-                    password
-                }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Falha no registro');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Redirecionar para a página de login ou iniciar sessão
-                window.location.href = 'login.html?registered=true';
-            })
-            .catch(error => {
-                document.getElementById('error-message').style.display = 'block';
-                console.error('Erro de registro:', error);
-            });
-            
             // TEMPORÁRIO: Para demonstração, vamos simular um registro bem-sucedido
             // Em produção, este código seria removido
-            window.location.href = 'login.html?registered=true';
+            
+            // Create mock user data
+            const userData = {
+                name: `${firstName} ${lastName}`,
+                email: email,
+                role: 'user'
+            };
+            
+            // Store mock auth token
+            const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlVzdcOhcmlvIERlbW8iLCJyb2xlIjoidXNlciIsImlhdCI6MTUxNjIzOTAyMn0';
+            localStorage.setItem('authToken', mockToken);
+            localStorage.setItem('userData', JSON.stringify(userData));
+            
+            // Check if there's a pending profile to transfer
+            const pendingProfile = sessionStorage.getItem('pendingProfile');
+            if (pendingProfile) {
+                const profileData = JSON.parse(pendingProfile);
+                
+                // Move profile data to localStorage
+                // In a real app, you'd also save this to the backend
+                localStorage.setItem('buyerProfiles', JSON.stringify([profileData]));
+                localStorage.setItem('activeProfile', pendingProfile);
+                
+                // Clear session storage
+                sessionStorage.removeItem('pendingProfile');
+            }
+            
+            // Check for redirect preference
+            const redirect = sessionStorage.getItem('redirectAfterAuth') || 'index.html';
+            sessionStorage.removeItem('redirectAfterAuth');
+            
+            // Redirect to appropriate page
+            window.location.href = redirect;
         }
         
         function socialRegister(provider) {

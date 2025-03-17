@@ -350,7 +350,7 @@
     </div>
 
     <div class="container">
-        <header class="header">
+        <header class="header" id="header-content">
             <div class="header-content">
                 <h1 class="logo">Modulari</h1>
                 <button class="button button-secondary" onclick="goBack()">
@@ -393,6 +393,11 @@
     <script type="module">
         import dataService from './data-service.js';
         import permissionService from './permission-service.js';
+
+        import { renderHeader } from './header-component.js';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHeader('header-container');
 
         // Verificar autenticação
         document.addEventListener('DOMContentLoaded', function() {

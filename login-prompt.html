@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Criar Conta</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        body {
+            background-color: var(--surface-alt);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md);
+        }
+
+        .prompt-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-xl);
+            text-align: center;
+        }
+
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--surface);
+            margin: 0 auto var(--spacing-lg);
+        }
+
+        .prompt-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .prompt-subtitle {
+            color: var(--text-light);
+            margin-bottom: var(--spacing-lg);
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .button {
+            padding: var(--spacing-md);
+        }
+
+        @media (max-width: 640px) {
+            .prompt-container {
+                padding: var(--spacing-lg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="prompt-container">
+        <div class="icon-circle">🏠</div>
+        <h1 class="prompt-title">Perfil criado com sucesso!</h1>
+        <p class="prompt-subtitle">
+            Criar uma conta permite que você salve seus perfis, 
+            matches e preferências para acessar de qualquer dispositivo.
+        </p>
+        
+        <div class="buttons-container">
+            <button class="button button-primary" onclick="createAccount()">
+                Criar conta agora
+            </button>
+            <button class="button button-secondary" onclick="continueWithoutAccount()">
+                Continuar sem criar conta
+            </button>
+            <button class="button button-secondary" onclick="loginExisting()">
+                Já tenho uma conta
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import dataService from './data-service.js';
+        import permissionService from './permission-service.js';
+        
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if (permissionService.isAuthenticated()) {
+                // Already logged in, proceed to property cards
+                window.location.href = 'property-cards.html';
+            }
+        });
+        
+        // Create account option
+        window.createAccount = function() {
+            // Store current data in session to retrieve after registration
+            sessionStorage.setItem('pendingProfile', JSON.stringify(dataService.getActiveProfile()));
+            sessionStorage.setItem('redirectAfterAuth', 'property-cards.html');
+            window.location.href = 'register.html';
+        };
+        
+        // Continue without account
+        window.continueWithoutAccount = function() {
+            // Use session storage for non-authenticated users
+            const activeProfile = dataService.getActiveProfile();
+            if (activeProfile) {
+                sessionStorage.setItem('tempActiveProfile', JSON.stringify(activeProfile));
+            }
+            window.location.href = 'property-cards.html';
+        };
+        
+        // Login to existing account
+        window.loginExisting = function() {
+            // Store data to retrieve after login
+            sessionStorage.setItem('pendingProfile', JSON.stringify(dataService.getActiveProfile()));
+            sessionStorage.setItem('redirectAfterAuth', 'property-cards.html');
+            window.location.href = 'login.html';
+        };
+    </script>
+</body>
+</html>

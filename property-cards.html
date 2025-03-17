@@ -388,7 +388,7 @@
 </head>
 <body>
     <div class="container">
-        <header class="header">
+        <header class="header" id="header-content">
             <div class="header-content">
                 <h1 class="logo">Modulari</h1>
                 <div class="header-actions">
@@ -457,6 +457,11 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Carregue o novo script modular -->
-    <script type="module" src="property-cards.js"></script>
+    <script type="module" src="property-cards.js">
+        import { renderHeader } from './header-component.js';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHeader('header-container');
+    </script>
 </body>
 </html>
