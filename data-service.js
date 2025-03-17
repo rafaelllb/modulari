@@ -161,7 +161,12 @@ class DataService {
    * @returns {Object} Preferências do usuário
    */
   getPreferences() {
-    return JSON.parse(this.getStorageItem(this.KEYS.PREFERENCES) || '{}');
+    try {
+      return JSON.parse(this.getStorageItem(this.KEYS.PREFERENCES) || '{}');
+    } catch (error) {
+      console.error('Error parsing preferences:', error);
+      return {};
+    }
   }
 
   /**
@@ -186,7 +191,7 @@ class DataService {
    * @param {Object} preferences - Preferências do usuário
    * @returns {number} Score de match (0-100)
    */
-  function calculateMatchScore(property, preferences) {
+  calculateMatchScore(property, preferences) {
     if (!preferences) return 50; // Default score if no preferences are provided
     
     // Define scoring weights for different factors
@@ -453,6 +458,11 @@ class DataService {
    * @returns {Object} Perfil criado
    */
   createSearchProfile(profileData) {
+    if (!profileData || typeof profileData !== 'object') {
+      console.error('Invalid profile data');
+      return null;
+    }
+    
     const profiles = this.getBuyerProfiles();
     
     const newProfile = {
@@ -611,7 +621,8 @@ class DataService {
       addedAt: new Date().toISOString(),
       profileId,
       notes: '',
-      rating: 0
+      rating: 0,
+      match: this.calculateMatchScore(property, this.getProfileById(profileId)?.preferences || {})
     };
     
     matches.push(match);
