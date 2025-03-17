@@ -349,10 +349,10 @@
                 localStorage.setItem('preferences', JSON.stringify(answers));
                 window.location.href = 'property-cards.html';
             }
-			if (currentQuestion === questions.length - 1) {
-				saveProfile();
-				window.location.href = 'property-cards.html';
-			}
+            if (currentQuestion === questions.length - 1) {
+                saveProfile();
+                window.location.href = 'property-cards.html';
+            }
         }
 		
 		function saveProfile() {
@@ -414,6 +414,11 @@
 
         // Iniciar com a primeira questão
         renderQuestion();
+
+        window.selectChoice = selectChoice;
+        window.previousQuestion = previousQuestion;
+        window.nextQuestion = nextQuestion;
+        window.showError = showError;
     </script>
 </body>
 </html>
