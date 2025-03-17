@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Painel Administrativo</title>
+    <link rel="stylesheet" href="../base-styles.css">
+    <style>
+        body {
+            background-color: var(--surface-alt);
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--primary);
+            color: var(--surface);
+            padding: var(--spacing-md);
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: var(--spacing-md) 0;
+            margin-bottom: var(--spacing-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu-item {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-sm);
+            color: var(--surface);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s;
+        }
+
+        .sidebar-menu-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+
+        .admin-content {
+            padding: var(--spacing-md);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+            color: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        .stat-change {
+            margin-top: var(--spacing-xs);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-change.positive {
+            color: #10B981;
+        }
+
+        .stat-change.negative {
+            color: #EF4444;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-md);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .card-body {
+            padding: var(--spacing-md);
+        }
+
+        .recent-users-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .recent-user-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .recent-user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--surface);
+            font-weight: 500;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .user-email {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .user-date {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .date-filter select {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                Modulari Admin
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="dashboard.html" class="sidebar-menu-link active">
+                        <span>📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="users.html" class="sidebar-menu-link">
+                        <span>👥</span>
+                        Usuários
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="properties.html" class="sidebar-menu-link">
+                        <span>🏠</span>
+                        Imóveis
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="settings.html" class="sidebar-menu-link">
+                        <span>⚙️</span>
+                        Configurações
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link" id="logout-link">
+                        <span>🚪</span>
+                        Sair
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="admin-content">
+            <header class="admin-header">
+                <h1 class="admin-title">Dashboard</h1>
+                <div class="date-filter">
+                    <span>Período:</span>
+                    <select onchange="updateDashboard(this.value)">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30">Últimos 30 dias</option>
+                        <option value="90">Últimos 3 meses</option>
+                        <option value="365">Último ano</option>
+                    </select>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">👥</span>
+                    <span class="stat-value">487</span>
+                    <span class="stat-label">Usuários</span>
+                    <span class="stat-change positive">
+                        <span>↑</span> 12.5% neste mês
+                    </span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🏠</span>
+                    <span class="stat-value">1,245</span>
+                    <span class="stat-label">Imóveis</span>
+                    <span class="stat-change positive">
+                        <span>↑</span> 8.3% neste mês
+                    </span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">💼</span>
+                    <span class="stat-value">563</span>
+                    <span class="stat-label">Matches</span>
+                    <span class="stat-change positive">
+                        <span>↑</span> 15.2% neste mês
+                    </span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">💰</span>
+                    <span class="stat-value">R$ 28,5K</span>
+                    <span class="stat-label">Valor Estimado</span>
+                    <span class="stat-change negative">
+                        <span>↓</span> 3.8% neste mês
+                    </span>
+                </div>
+            </div>
+
+            <h2 class="section-title">Visão Geral</h2>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Registros de Usuários</h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" id="user-registrations-chart">
+                        <!-- Canvas para o gráfico será inserido via JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Usuários Recentes</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="recent-users-list">
+                            <li class="recent-user-item">
+                                <div class="user-avatar">JS</div>
+                                <div class="user-info">
+                                    <div class="user-name">João Silva</div>
+                                    <div class="user-email">joao.silva@exemplo.com</div>
+                                </div>
+                                <div class="user-date">Hoje</div>
+                            </li>
+                            <li class="recent-user-item">
+                                <div class="user-avatar">MS</div>
+                                <div class="user-info">
+                                    <div class="user-name">Maria Santos</div>
+                                    <div class="user-email">maria.santos@exemplo.com</div>
+                                </div>
+                                <div class="user-date">Ontem</div>
+                            </li>
+                            <li class="recent-user-item">
+                                <div class="user-avatar">PC</div>
+                                <div class="user-info">
+                                    <div class="user-name">Pedro Costa</div>
+                                    <div class="user-email">pedro.costa@exemplo.com</div>
+                                </div>
+                                <div class="user-date">3 dias atrás</div>
+                            </li>
+                            <li class="recent-user-item">
+                                <div class="user-avatar">AO</div>
+                                <div class="user-info">
+                                    <div class="user-name">Ana Oliveira</div>
+                                    <div class="user-email">ana.oliveira@exemplo.com</div>
+                                </div>
+                                <div class="user-date">1 semana atrás</div>
+                            </li>
+                            <li class="recent-user-item">
+                                <div class="user-avatar">CF</div>
+                                <div class="user-info">
+                                    <div class="user-name">Carlos Ferreira</div>
+                                    <div class="user-email">carlos.ferreira@exemplo.com</div>
+                                </div>
+                                <div class="user-date">1 semana atrás</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Distribuição por Localização</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="location-chart">
+                            <!-- Canvas para o gráfico será inserido via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import permissionService from '../services/permission-service.js';
+
+        // Verificar se o usuário é administrador
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!permissionService.isAuthenticated()) {
+                window.location.href = '../login.html?redirect=' + encodeURIComponent(window.location.href);
+                return;
+            }
+            
+            if (!permissionService.hasRole('admin')) {
+                window.location.href = '../index.html';
+                return;
+            }
+            
+            // Configurar link de logout
+            document.getElementById('logout-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                permissionService.logout();
+            });
+            
+            // Inicializar gráficos
+            initializeCharts();
+        });
+
+        // Função para atualizar o dashboard com base no período selecionado
+        window.updateDashboard = function(days) {
+            console.log(`Atualizando dashboard para os últimos ${days} dias`);
+            // Aqui você implementaria a lógica real para atualizar os dados
+            initializeCharts(days);
+        };
+
+        // Função para inicializar os gráficos
+        function initializeCharts(days = 30) {
+            // Em um ambiente real, você usaria bibliotecas como Chart.js
+            // Para esta demonstração, vamos simular com elementos HTML
+            
+            // Gráfico de registros de usuários
+            const userChart = document.getElementById('user-registrations-chart');
+            userChart.innerHTML = `
+                <div style="display: flex; flex-direction: column; height: 100%;">
+                    <div style="display: flex; justify-content: space-between; height: 30px; align-items: flex-end; margin-bottom: 10px;">
+                        <div style="height: 80%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 60%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 70%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 90%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 75%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 85%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 95%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 65%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 80%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 90%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 100%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="height: 85%; width: 20px; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                    </div>
+                    <div style="height: 1px; background: var(--border);"></div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; color: var(--text-light); font-size: 0.75rem;">
+                        <div>Jan</div>
+                        <div>Fev</div>
+                        <div>Mar</div>
+                        <div>Abr</div>
+                        <div>Mai</div>
+                        <div>Jun</div>
+                        <div>Jul</div>
+                        <div>Ago</div>
+                        <div>Set</div>
+                        <div>Out</div>
+                        <div>Nov</div>
+                        <div>Dez</div>
+                    </div>
+                </div>
+            `;
+            
+            // Gráfico de distribuição por localização
+            const locationChart = document.getElementById('location-chart');
+            locationChart.innerHTML = `
+                <div style="display: flex; flex-direction: column; height: 100%; justify-content: center;">
+                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                        <div style="width: 16px; height: 16px; background: #3B82F6; border-radius: 50%; margin-right: 8px;"></div>
+                        <div style="flex: 1;">Praia (45%)</div>
+                        <div style="width: 45%; height: 16px; background: #3B82F6; border-radius: 8px;"></div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                        <div style="width: 16px; height: 16px; background: #10B981; border-radius: 50%; margin-right: 8px;"></div>
+                        <div style="flex: 1;">Cidade (30%)</div>
+                        <div style="width: 30%; height: 16px; background: #10B981; border-radius: 8px;"></div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 16px; height: 16px; background: #F59E0B; border-radius: 50%; margin-right: 8px;"></div>
+                        <div style="flex: 1;">Campo (25%)</div>
+                        <div style="width: 25%; height: 16px; background: #F59E0B; border-radius: 8px;"></div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Encontre seu Lar Ideal</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <link rel="stylesheet" href="toast-component.css">
+    <style>
+        :root {
+            /* Button States */
+            --button-top: -100px; /* Posição inicial fora da tela */
+            --button-visible-top: 24px; /* Posição quando visível */
+            /* Core colors - using deep blue for trust and gold for luxury */
+            --primary: #1a365d;
+            --primary-light: #2a4a7f;
+            --accent: #c5a572;
+            --accent-light: #d4b98c;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --text: #1a202c;
+            --text-light: #4a5568;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--surface);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .main-content {
+            padding: 64px 0;
+        }
+
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .hero-text {
+            max-width: 540px;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            color: var(--primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-light);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .lifestyle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 64px;
+        }
+
+        .lifestyle-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .lifestyle-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(26, 54, 93, 0.12);
+            border-color: var(--accent);
+        }
+
+        .lifestyle-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .lifestyle-content {
+            padding: 24px;
+        }
+
+        .lifestyle-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lifestyle-description {
+            color: var(--text-light);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 48px;
+            background: var(--surface-alt);
+            border-radius: 16px;
+            margin-bottom: 64px;
+        }
+
+        .cta-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .benefit-item {
+            text-align: left;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .benefit-icon {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .benefit-content h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .benefit-content p {
+            font-size: 0.9375rem;
+            color: var(--text-light);
+        }
+
+        .progress-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 16px 0;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profiles-button {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+        }
+
+        .profiles-button:hover {
+            background: var(--primary-light);
+        }
+
+        .profiles-button.visible {
+            display: inline-block;
+        }
+
+        .profiles-button:not(.visible) {
+            display: none;
+        }
+
+        .lifestyle-card.loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            min-height: 300px;
+        }
+
+        .benefits-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-button {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            background: var(--surface-alt);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-button:hover {
+            background: var(--border);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            min-width: 200px;
+            z-index: 100;
+            overflow: hidden;
+            display: none;
+        }
+
+        .user-dropdown.active {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: var(--spacing-sm);
+            color: var(--text);
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background: var(--surface-alt);
+        }
+
+        @media (max-width: 768px) {
+            .profiles-button {
+                padding: 8px 12px;
+                font-size: 0.875rem;
+            }
+
+            .hero-section {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .lifestyle-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 640px) {
+            .benefits-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .benefits-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast-container" class="toast-container"></div>
+    
+    <header class="header">
+        <div class="container header-content">
+            <h1 class="logo">Modulari</h1>
+            <button id="profilesButton" class="profiles-button" onclick="window.location.href='profiles.html'">
+                Meus Perfis
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        <section class="hero-section">
+            <div class="hero-text">
+                <h2 class="hero-title">Descubra o imóvel que combina com seu estilo de vida</h2>
+                <p class="hero-subtitle">Nossa tecnologia analisa suas preferências para encontrar as melhores opções que se adequam ao seu perfil e necessidades.</p>
+            </div>
+            <div class="cta-section">
+                <h3 class="cta-title">Como você imagina seu espaço ideal?</h3>
+                <p>Selecione o estilo que mais combina com você</p>
+            </div>
+        </section>
+
+        <div class="lifestyle-grid" id="lifestyle-grid">
+            <!-- Cards will be loaded dynamically -->
+        </div>
+
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <div class="benefit-icon">🎯</div>
+                <div class="benefit-content">
+                    <h3>Match Inteligente</h3>
+                    <p>Análise personalizada baseada em suas preferências e estilo de vida.</p>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">⚡</div>
+                <div class="benefit-content">
+                    <h3>Processo Eficiente</h3>
+                    <p>Encontre seu imóvel ideal de forma rápida e assertiva.</p>
+                </div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">💎</div>
+                <div class="benefit-content">
+                    <h3>Opções Premium</h3>
+                    <p>Acesso a um portfólio selecionado de imóveis de alto padrão.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="progress-footer">
+        <div class="container progress-container">
+            <div class="progress-item">
+                <span>🎯</span>
+                <span>Nível 1</span>
+            </div>
+            <div class="progress-item">
+                <span>🗺️</span>
+                <span>Início da jornada</span>
+            </div>
+            <div class="progress-item">
+                <span>⭐</span>
+                <span>Descobrindo seu estilo</span>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import dataService from './data-service.js';
+        import permissionService from './permission-service.js';
+        import toastService from './toast-service.js';
+		
+		// Export function to global scope
+        window.selectLifestyle = function(lifestyle) {
+            dataService.saveSelectedLifestyle(lifestyle);
+            window.location.href = 'discovery.html';
+        };
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Show loading state
+            showLoadingLifestyles();
+            
+            try {
+                // Check if user is authenticated
+                if (permissionService.isAuthenticated()) {
+                    updateUIForAuthenticatedUser();
+                    
+                    // If the token needs renewal, attempt it
+                    if (permissionService.needsTokenRefresh()) {
+                        await permissionService.refreshToken();
+                    }
+                }
+                
+                // Check for saved profiles regardless of authentication
+                checkSavedProfiles();
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 600));
+                
+                // Render lifestyle options
+                renderLifestyleOptions();
+            } catch (error) {
+                console.error('Error initializing application:', error);
+				document.getElementById('lifestyle-grid').innerHTML = 
+					'<div class="error-state">Erro ao carregar estilos de vida</div>';
+                toastService.error('Erro ao inicializar a aplicação');
+            }
+        });
+        
+        // Show loading state for lifestyle cards
+        function showLoadingLifestyles() {
+            const lifestyleGrid = document.getElementById('lifestyle-grid');
+            lifestyleGrid.innerHTML = Array(3).fill().map(() => `
+                <div class="lifestyle-card loading"></div>
+            `).join('');
+        }
+        
+        // Render lifestyle options
+        function renderLifestyleOptions() {
+            const lifestyleGrid = document.getElementById('lifestyle-grid');
+            
+            const lifestyles = [
+                {
+                    id: 'beach',
+                    title: 'Vida Litorânea',
+                    icon: '🌊',
+                    description: 'Desperte com a brisa do mar e viva momentos de tranquilidade à beira-mar.',
+                    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80'
+                },
+                {
+                    id: 'city',
+                    title: 'Centro Urbano',
+                    icon: '🌆',
+                    description: 'Conectado com a energia da cidade e todas as facilidades urbanas.',
+                    image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80'
+                },
+                {
+                    id: 'countryside',
+                    title: 'Refúgio Natural',
+                    icon: '🌳',
+                    description: 'Encontre paz e qualidade de vida em meio à natureza.',
+                    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80'
+                }
+            ];
+            
+            lifestyleGrid.innerHTML = lifestyles.map(lifestyle => `
+                <div class="lifestyle-card" onclick="selectLifestyle('${lifestyle.id}')">
+                    <img src="${lifestyle.image}" alt="${lifestyle.title}" class="lifestyle-image">
+                    <div class="lifestyle-content">
+                        <h3 class="lifestyle-title">
+                            <span>${lifestyle.icon}</span>
+                            ${lifestyle.title}
+                        </h3>
+                        <p class="lifestyle-description">${lifestyle.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Function to check for saved profiles
+        function checkSavedProfiles() {
+            const profilesButton = document.getElementById('profilesButton');
+            const profiles = dataService.getBuyerProfiles();
+            
+            if (profiles.length > 0) {
+                profilesButton.classList.add('visible');
+            } else {
+                profilesButton.classList.remove('visible');
+            }
+        }
+        
+        // Function to update UI for authenticated users
+        function updateUIForAuthenticatedUser() {
+            const user = permissionService.getCurrentUser();
+            if (!user) return;
+            
+            // Example: Update header to show user information
+            const headerContent = document.querySelector('.header-content');
+            
+            // Check if user menu already exists to avoid duplication
+            if (!document.getElementById('user-menu')) {
+                const profilesButton = document.getElementById('profilesButton');
+                if (profilesButton) {
+                    profilesButton.remove();
+                }
+                
+                const userMenuHtml = `
+                    <div class="user-menu" id="user-menu">
+                        <button class="user-button">
+                            <span class="user-avatar">${user.name ? user.name.charAt(0) : 'U'}</span>
+                            <span class="user-name">${user.name || 'Usuário'}</span>
+                        </button>
+                        <div class="user-dropdown">
+                            <a href="profile.html">Meu Perfil</a>
+                            <a href="profiles.html">Meus Perfis de Busca</a>
+                            <a href="matches.html">Meus Matches</a>
+                            ${permissionService.hasRole('admin') ? '<a href="admin/dashboard.html">Administração</a>' : ''}
+                            <a href="#" id="logout-button">Sair</a>
+                        </div>
+                    </div>
+                `;
+                
+                headerContent.insertAdjacentHTML('beforeend', userMenuHtml);
+                
+                // Add event listener for logout button
+                document.getElementById('logout-button').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    permissionService.logout();
+                });
+                
+                // Toggle dropdown
+                document.querySelector('.user-button').addEventListener('click', () => {
+                    document.querySelector('.user-dropdown').classList.toggle('active');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    const userMenu = document.getElementById('user-menu');
+                    if (userMenu && !userMenu.contains(e.target)) {
+                        document.querySelector('.user-dropdown').classList.remove('active');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

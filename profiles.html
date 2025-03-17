@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Perfis de Comprador</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <link rel="stylesheet" href="toast-component.css">
+    <style>
+        .section-header {
+            margin-bottom: var(--spacing-lg);
+            max-width: 800px;
+        }
+
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .profile-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .profile-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            background: var(--surface-alt);
+        }
+
+        .lifestyle-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--surface);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text);
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: var(--spacing-sm);
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .profile-stats {
+            padding: var(--spacing-md);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: var(--spacing-sm);
+            background: var(--surface-alt);
+            border-radius: var(--radius-sm);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .preferences-section {
+            padding: var(--spacing-md);
+        }
+
+        .preferences-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text);
+        }
+
+        .preferences-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .preference-item {
+            background: var(--surface-alt);
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .matches-preview {
+            padding: var(--spacing-md);
+            border-top: 1px solid var(--border);
+        }
+
+        .match-item {
+            display: flex;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--surface-alt);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .match-image {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+        }
+
+        .match-info {
+            flex: 1;
+        }
+
+        .match-title {
+            font-weight: 500;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text);
+        }
+
+        .match-price {
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .match-rating {
+            display: flex;
+            gap: 2px;
+            color: #FFB300;
+            font-size: 0.875rem;
+            margin-top: var(--spacing-xs);
+        }
+
+        .profile-actions {
+            padding: var(--spacing-md);
+            display: flex;
+            gap: var(--spacing-sm);
+            border-top: 1px solid var(--border);
+        }
+
+        .new-profile-card {
+            border: 2px dashed var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl);
+            cursor: pointer;
+            background: var(--surface);
+            min-height: 400px;
+        }
+
+        .new-profile-card:hover {
+            border-color: var(--primary);
+            background: var(--surface-alt);
+        }
+
+        .active-badge {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background: var(--success);
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .profiles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast-container" class="toast-container"></div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+            </div>
+        </header>
+
+        <div class="section-header">
+            <h2 class="title-lg">Seus Perfis de Busca</h2>
+            <p class="text-body">Gerencie diferentes perfis para suas buscas de imóveis</p>
+        </div>
+
+        <div class="profiles-grid" id="profiles-grid">
+            <!-- Os perfis serão inseridos aqui via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Load script as module -->
+    <script type="module" src="profiles.js"></script>
+</body>
+</html>

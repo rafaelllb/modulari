@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Descubra seu Lar</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <link rel="stylesheet" href="toast-component.css">
+    <style>
+        /* Estilos específicos da página property-cards */
+        body {
+            background-color: var(--surface-alt);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+
+        /* Adicionar estilos para o perfil ativo */
+        .active-profile {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--surface);
+            font-size: 1.25rem;
+        }
+
+        .profile-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .profile-preferences {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+        }
+
+        .preference-tag {
+            background: var(--surface-alt);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .toggle-button {
+            padding: var(--spacing-xs) var(--spacing-md);
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--surface-alt);
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .toggle-button.active {
+            background: var(--primary);
+            color: var(--surface);
+        }
+
+        .card-stack {
+            position: relative;
+            height: 600px;
+        }
+
+        .property-card {
+            position: absolute;
+            width: 100%;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease-out;
+            cursor: grab;
+            top: 0;
+            left: 0;
+        }
+
+        .property-card.dragging {
+            cursor: grabbing;
+            transition: none;
+        }
+
+        .match-badge {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background: var(--primary);
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-weight: 500;
+            z-index: 1;
+            backdrop-filter: blur(4px);
+        }
+
+        .match-badge.high-match {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            animation: pulse 2s infinite;
+        }
+
+        .property-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .property-content {
+            padding: var(--spacing-md);
+        }
+
+        .property-tips {
+            margin: var(--spacing-sm) 0;
+        }
+
+        .tip {
+            background: var(--primary-light);
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-xs);
+            font-size: 0.875rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: var(--spacing-md);
+            border-top: 1px solid var(--border);
+        }
+
+        .action-button {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .action-button:hover {
+            transform: scale(1.1);
+        }
+
+        .dislike-button {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+        .like-button {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .info-button {
+            background: var(--surface-alt);
+            color: var(--primary);
+        }
+
+        .choice-info {
+            position: fixed;
+            top: 50%;
+            font-size: 8rem;
+            font-weight: bold;
+            color: var(--surface);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transform: translateY(-50%);
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .choice-like {
+            right: 10%;
+            color: #10B981;
+        }
+
+        .choice-nope {
+            left: 10%;
+            color: #EF4444;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            padding: var(--spacing-sm);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .progress-content {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Grid View Styles */
+        .grid-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+            padding: var(--spacing-md) 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .grid-view .property-card {
+            position: relative;
+            width: 100%;
+            height: auto;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: default;
+            transform: none !important;
+        }
+
+        .grid-view .property-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: var(--shadow-md);
+        }
+
+        .grid-view .property-image {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+        }
+
+        .grid-view .property-content {
+            padding: var(--spacing-md);
+        }
+
+        .grid-view .property-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .grid-view .property-price {
+            font-size: 1.25rem;
+            color: var(--success);
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .grid-view .property-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin: var(--spacing-sm) 0;
+        }
+
+        .grid-view .feature-tag {
+            background: var(--surface-alt);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .grid-view .grid-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--border);
+        }
+
+        .grid-view .grid-button {
+            flex: 1;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+        }
+
+        .grid-view .grid-button.like {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .grid-view .grid-button.info {
+            background: var(--surface-alt);
+            color: var(--primary);
+        }
+
+        .container.grid-mode {
+            max-width: 1200px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--spacing-sm);
+            }
+
+            .property-card {
+                margin: 0 var(--spacing-sm);
+            }
+
+            .action-button {
+                width: 56px;
+                height: 56px;
+                font-size: 1.25rem;
+            }
+            
+            .grid-view {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+                <div class="header-actions">
+                    <button class="button button-secondary" onclick="window.location.href='matches.html'">
+                        Ver Matches
+                    </button>
+                    <button class="button button-secondary" onclick="window.location.href='profiles.html'">
+                        Trocar Perfil
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Informações do Perfil Ativo -->
+        <div class="active-profile">
+            <div class="profile-header">
+                <div class="profile-icon" id="profileIcon"></div>
+                <div class="profile-info">
+                    <h3 id="profileName">Carregando perfil...</h3>
+                    <div class="profile-preferences" id="profilePreferences">
+                        <!-- Preferências serão inseridas aqui -->
+                    </div>
+                </div>
+            </div>
+            <div class="profile-stats" id="profileStats">
+                <!-- Estatísticas do perfil serão inseridas aqui -->
+            </div>
+        </div>
+
+        <div class="view-toggle">
+            <button class="toggle-button active" onclick="switchView('cards')" id="cards-view-btn">
+                <span>🎴</span> Cards
+            </button>
+            <button class="toggle-button" onclick="switchView('grid')" id="grid-view-btn">
+                <span>📑</span> Lista
+            </button>
+        </div>
+
+        <div id="cards-view" class="view-container">
+            <div id="card-stack" class="card-stack"></div>
+            <div class="choice-info choice-like">LIKE</div>
+            <div class="choice-info choice-nope">NOPE</div>
+        </div>
+
+        <div id="grid-view" class="view-container grid-view" style="display: none;"></div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-content">
+            <div class="progress-item">
+                <span>🎯</span>
+                <span id="profile-level">Nível 1</span>
+            </div>
+            <div class="progress-item">
+                <span>💝</span>
+                <span id="matches-count">0 matches</span>
+            </div>
+            <div class="progress-item">
+                <span>⭐</span>
+                <span id="profile-status">Explorador</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container para toasts de notificação -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Carregue o novo script modular -->
+    <script type="module" src="property-cards.js"></script>
+</body>
+</html>

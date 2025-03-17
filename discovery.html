@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Descubra seu Estilo</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--surface-alt);
+            border-radius: 2px;
+            margin-bottom: var(--spacing-xl);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+
+        .choices-grid {
+            display: grid;
+            /*grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));*/
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .choice-card {
+            position: relative;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: transform 0.2s;
+            box-shadow: var(--shadow-sm);
+            min-height: 180px;
+        }
+
+        .choice-card.loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .choice-card.selected {
+            outline: 3px solid var(--primary);
+        }
+
+        .choice-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .choice-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 54, 93, 0.9);
+            color: var(--surface);
+            padding: var(--spacing-xs);
+            text-align: center;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        .navigation-buttons .button {
+            min-width: 120px;
+        }
+
+        .navigation-buttons .button:disabled {
+            background: var(--surface-alt);
+            color: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animated {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .progress-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: var(--spacing-sm) 0;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        @media (min-width: 640px) {
+            .choices-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .choices-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+
+        .question-container {
+            min-height: 400px;
+        }
+
+        @media (max-width: 640px) {
+            .navigation-buttons {
+                flex-direction: column;
+            }
+            
+            .button {
+                width: 100%;
+                margin-bottom: var(--spacing-xs);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+            </div>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+
+        <div id="question-container" class="question-container animated">
+            <!-- Conteúdo dinâmico será inserido aqui -->
+        </div>
+    </div>
+
+    <footer class="progress-footer">
+        <div class="container progress-container">
+            <div class="progress-item">
+                <span>🎯</span>
+                <span>Nível 1</span>
+            </div>
+            <div class="progress-item">
+                <span>🗺️</span>
+                <span>Início da jornada</span>
+            </div>
+            <div class="progress-item">
+                <span>⭐</span>
+                <span>Descobrindo seu estilo</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const questions = [
+            {
+                id: 'purpose',
+                title: 'Qual é o seu objetivo com este imóvel?',
+                type: 'single',
+                choices: [
+                    { id: 'live', label: 'Morar', image: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80' },
+                    { id: 'invest', label: 'Investir', image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80' },
+                    { id: 'both', label: 'Ambos', image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80' }
+                ]
+            },
+            {
+                id: 'lifestyle',
+                title: 'Como você imagina seu dia a dia ideal?',
+                type: 'single',
+                choices: [
+                    { id: 'quiet', label: 'Tranquilo e reservado', image: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80' },
+                    { id: 'active', label: 'Movimentado e social', image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&q=80' },
+                    { id: 'balanced', label: 'Equilibrado', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80' }
+                ]
+            },
+            {
+                id: 'priorities',
+                title: 'O que é mais importante para você em um imóvel?',
+                type: 'multiple',
+                choices: [
+                    { id: 'space', label: 'Espaço amplo', image: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&q=80' },
+                    { id: 'location', label: 'Localização', image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80' },
+                    { id: 'privacy', label: 'Privacidade', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80' },
+                    { id: 'amenities', label: 'Comodidades', image: 'https://images.unsplash.com/photo-1505692952047-1a78307da8f2?w=800&q=80' }
+                ]
+            },
+            {
+                id: 'surrounding',
+                title: 'O que você gostaria de ter por perto?',
+                type: 'multiple',
+                choices: [
+                    { id: 'nature', label: 'Natureza', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80' },
+                    { id: 'services', label: 'Serviços', image: 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=800&q=80' },
+                    { id: 'leisure', label: 'Lazer', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80' },
+                    { id: 'transport', label: 'Transporte', image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80' }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        const answers = {};
+        
+        function showLoading() {
+            const container = document.getElementById('question-container');
+            container.innerHTML = `
+                <div class="choices-grid">
+                ${Array(4).fill().map(() => `
+                    <div class="choice-card loading"></div>
+                `).join('')}
+                </div>
+            `;
+        }
+
+        function renderQuestion() {
+            const question = questions[currentQuestion];
+            const container = document.getElementById('question-container');
+            const progress = document.getElementById('progress');
+            
+            // Atualizar barra de progresso
+            progress.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+            container.innerHTML = `
+                <h2 class="question-title">${question.title}</h2>
+                <div class="choices-grid">
+                    ${question.choices.map(choice => `
+                        <div class="choice-card" data-id="${choice.id}" onclick="selectChoice('${choice.id}')">
+                            <img src="${choice.image}" alt="${choice.label}" class="choice-image">
+                            <div class="choice-label">${choice.label}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="navigation-buttons">
+                    ${currentQuestion > 0 ? `
+                        <button class="button button-secondary" onclick="previousQuestion()">Voltar</button>
+                    ` : '<div></div>'}
+                    <button class="button button-primary" 
+                            onclick="nextQuestion()" 
+                            id="next-button"
+                            ${question.type === 'single' ? 'disabled' : ''}>
+                        ${currentQuestion === questions.length - 1 ? 'Concluir' : 'Próximo'}
+                    </button>
+                </div>
+            `;
+
+            // Restaurar seleções anteriores se existirem
+            if (answers[question.id]) {
+                const selectedAnswers = Array.isArray(answers[question.id]) 
+                    ? answers[question.id] 
+                    : [answers[question.id]];
+                    
+                selectedAnswers.forEach(answerId => {
+                    const element = document.querySelector(`[data-id="${answerId}"]`);
+                    if (element) element.classList.add('selected');
+                });
+            }
+        }
+
+        function selectChoice(choiceId) {
+            const question = questions[currentQuestion];
+            const choiceElement = document.querySelector(`[data-id="${choiceId}"]`);
+            
+            if (question.type === 'single') {
+                // Remover seleção anterior
+                document.querySelectorAll('.choice-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                choiceElement.classList.add('selected');
+                answers[question.id] = choiceId;
+                document.getElementById('next-button').disabled = false;
+            } else {
+                choiceElement.classList.toggle('selected');
+                // Atualizar respostas múltiplas
+                answers[question.id] = Array.from(document.querySelectorAll('.choice-card.selected'))
+                    .map(card => card.dataset.id);
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            const question = questions[currentQuestion];
+            
+            // Validar se há seleção para questões single
+            if (question.type === 'single' && !answers[question.id]) {
+                return;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                // Salvar preferências e ir para próxima página
+                localStorage.setItem('preferences', JSON.stringify(answers));
+                window.location.href = 'property-cards.html';
+            }
+			if (currentQuestion === questions.length - 1) {
+				saveProfile();
+				window.location.href = 'property-cards.html';
+			}
+        }
+		
+		function saveProfile() {
+			const lifestyle = localStorage.getItem('selectedLifestyle');
+			const preferences = JSON.parse(localStorage.getItem('preferences'));
+			
+			// Gerar nome do perfil baseado nas preferências
+			const purpose = preferences.purpose === 'live' ? 'Moradia' : 
+						   preferences.purpose === 'invest' ? 'Investimento' : 'Misto';
+			const location = lifestyle === 'beach' ? 'Praia' : 
+							lifestyle === 'city' ? 'Cidade' : 'Campo';
+			
+			const profileName = `${purpose} - ${location}`;
+			
+			// Criar novo perfil
+			const newProfile = {
+				id: Date.now().toString(),
+				name: profileName,
+				lifestyle,
+				preferences,
+				createdAt: new Date().toISOString()
+			};
+			
+			// Carregar perfis existentes
+			const existingProfiles = JSON.parse(localStorage.getItem('buyerProfiles')) || [];
+			
+			// Adicionar novo perfil
+			existingProfiles.push(newProfile);
+			
+			// Salvar perfis atualizados
+			localStorage.setItem('buyerProfiles', JSON.stringify(existingProfiles));
+			
+			// Definir como perfil ativo
+			localStorage.setItem('activeProfile', JSON.stringify(newProfile));
+		}
+
+        function showError(message) {
+            const container = document.getElementById('question-container');
+            container.innerHTML = `
+                <div class="empty-state">
+                <h3>Erro ao carregar questão</h3>
+                <p>${message}</p>
+                <button onclick="location.reload()" class="button button-primary mt-4">
+                    Tentar novamente
+                </button>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoading();
+            try {
+                await new Promise(resolve => setTimeout(resolve, 800));
+                renderQuestion();
+            } catch (error) {
+                showError('Não foi possível carregar as questões');
+            }
+        });
+
+        // Iniciar com a primeira questão
+        renderQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Seus Matches</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <link rel="stylesheet" href="toast-component.css">
+    <style>
+        .matches-summary {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .matches-grid {
+            display: grid;
+            gap: var(--spacing-md);
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            display: grid;
+            /*grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));*/
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .stat-card {
+            padding: var(--spacing-sm);
+            background: var(--surface-alt);
+            border-radius: var(--radius-md);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .property-card {
+            position: relative;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: var(--spacing-md);
+            min-height: 300px;
+        }
+
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .property-card.loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        .match-badge {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background: var(--primary);
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-weight: 500;
+            z-index: 1;
+        }
+
+        .match-badge.high-match {
+            background: linear-gradient(135deg, var(--primary), #4a6fa5);
+            animation: pulse 2s infinite;
+        }
+
+        .changes-badge {
+            position: absolute;
+            top: var(--spacing-sm);
+            left: var(--spacing-sm);
+            background: #FF5722;
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-weight: 500;
+            z-index: 1;
+            animation: pulse 2s infinite;
+        }
+
+        .property-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .property-content {
+            padding: var(--spacing-md);
+        }
+
+        .property-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin: var(--spacing-sm) 0;
+        }
+
+        .feature-tag {
+            background: var(--surface-alt);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .notes-section {
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--border);
+        }
+
+        .notes-input {
+            width: 100%;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            resize: vertical;
+            font-size: 0.875rem;
+            min-height: 80px;
+            margin-top: var(--spacing-xs);
+        }
+
+        .rating-section {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin: var(--spacing-sm) 0;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0;
+            color: #FFB300;
+            transition: transform 0.2s;
+        }
+
+        .star-button:hover {
+            transform: scale(1.1);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--border);
+        }
+
+        .sort-options {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            overflow-x: auto;
+            padding-bottom: var(--spacing-sm);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .sort-button {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .sort-button.active {
+            background: var(--primary);
+            color: var(--surface);
+            border-color: var(--primary);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .sort-button {
+                white-space: nowrap;
+                flex: 0 0 auto;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .matches-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .matches-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sort-options {
+                flex-wrap: wrap;
+            }
+            
+            .sort-button {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast-container" class="toast-container"></div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+                <button class="button button-secondary" onclick="window.location.href='property-cards.html'">
+                    Continuar buscando
+                </button>
+            </div>
+        </header>
+
+        <div class="matches-summary">
+            <h2 class="title-lg">Seus Matches</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-matches">0</div>
+                    <div class="stat-label">Matches encontrados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-rating">0.0</div>
+                    <div class="stat-label">Avaliação média</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="price-range">R$ 0</div>
+                    <div class="stat-label">Faixa de preço média</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sort-options">
+            <button class="sort-button active" onclick="sortMatches('match')">
+                % Match
+            </button>
+            <button class="sort-button" onclick="sortMatches('rating')">
+                Avaliação
+            </button>
+            <button class="sort-button" onclick="sortMatches('price')">
+                Preço
+            </button>
+            <button class="sort-button" onclick="sortMatches('date')">
+                Data de adição
+            </button>
+        </div>
+
+        <div id="matches-grid" class="matches-grid">
+            <!-- Os matches serão inseridos aqui via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal de Comparação -->
+    <div class="modal" id="compareModal" style="display: none;">
+        <div class="modal-content">
+            <h3 class="modal-title">Comparar Imóveis</h3>
+            <p class="text-body">Compare imóveis com 4 ou 5 estrelas:</p>
+            <div class="selected-properties" id="selectedProperties">
+                <!-- Lista de imóveis selecionados será inserida aqui -->
+            </div>
+            <div class="modal-actions">
+                <button class="button button-primary" onclick="compareProperties()">
+                    Comparar
+                </button>
+                <button class="button button-secondary" onclick="closeModal('compareModal')">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Compartilhamento -->
+    <div class="modal" id="shareModal" style="display: none;">
+        <div class="modal-content">
+            <h3 class="modal-title">Compartilhar Matches</h3>
+            <p class="text-body">Escolha como deseja compartilhar:</p>
+            <div class="share-options">
+                <button class="button button-primary" onclick="exportMatchesAsPDF()">
+                    Exportar como PDF
+                </button>
+                <button class="button button-secondary" onclick="window.print()">
+                    Imprimir
+                </button>
+            </div>
+            <div class="modal-actions">
+                <button class="button button-secondary" onclick="closeModal('shareModal')">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Estilos para elementos adicionais */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--primary);
+        }
+
+        .selected-properties {
+            margin: var(--spacing-md) 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .share-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin: var(--spacing-md) 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+        }
+
+        @media print {
+            .header,
+            .matches-summary,
+            .sort-options,
+            .card-actions,
+            .notes-section,
+            .modal,
+            .toast {
+                display: none !important;
+            }
+
+            .property-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: var(--spacing-lg);
+            }
+        }
+    </style>
+
+    <!-- Load script as module -->
+    <script type="module" src="matches.js"></script>
+</body>
+</html>

@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Meu Perfil</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        body {
+            background-color: var(--surface-alt);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--surface);
+            font-size: 3rem;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .profile-email {
+            color: var(--text-light);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-sm);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .meta-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .meta-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .profile-tabs {
+            display: flex;
+            margin-bottom: var(--spacing-md);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xs);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: var(--spacing-sm);
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-light);
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+        }
+
+        .tab-button:hover {
+            background: var(--surface-alt);
+        }
+
+        .tab-button.active {
+            background: var(--primary);
+            color: var(--surface);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-md);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .card-body {
+            padding: var(--spacing-md);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26, 54, 93, 0.1);
+        }
+
+        .form-help {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .notification-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .notification-item {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--surface);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .notification-read {
+            font-size: 0.875rem;
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 0;
+        }
+
+        .notification-read:hover {
+            text-decoration: underline;
+        }
+
+        .unread {
+            background-color: rgba(26, 54, 93, 0.05);
+        }
+
+        .preferences-section {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .preferences-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .toggle-label {
+            flex: 1;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--surface);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+        }
+
+        .activity-list:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 20px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .activity-item {
+            padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) var(--spacing-xl);
+            position: relative;
+        }
+
+        .activity-dot {
+            position: absolute;
+            left: 16px;
+            top: var(--spacing-sm);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .activity-text {
+            font-size: 0.875rem;
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--spacing-sm);
+            }
+
+            .profile-meta {
+                justify-content: center;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+                <button class="button button-secondary" onclick="window.location.href='index.html'">
+                    Voltar para Home
+                </button>
+            </div>
+        </header>
+
+        <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar"></div>
+            <div class="profile-info">
+                <h1 class="profile-name" id="profile-name">Carregando...</h1>
+                <div class="profile-email" id="profile-email"></div>
+                <div class="profile-meta">
+                    <div class="meta-item">
+                        <div class="meta-value" id="profiles-count">0</div>
+                        <div class="meta-label">Perfis de Busca</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value" id="matches-count">0</div>
+                        <div class="meta-label">Matches</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value" id="member-since">0</div>
+                        <div class="meta-label">Membro desde</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-tabs">
+            <button class="tab-button active" onclick="switchTab('profile')">Informações Pessoais</button>
+            <button class="tab-button" onclick="switchTab('password')">Alterar Senha</button>
+            <button class="tab-button" onclick="switchTab('notifications')">Notificações</button>
+            <button class="tab-button" onclick="switchTab('preferences')">Preferências</button>
+            <button class="tab-button" onclick="switchTab('activity')">Atividade Recente</button>
+        </div>
+
+        <div id="profile-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Informações Pessoais</h2>
+                </div>
+                <div class="card-body">
+                    <form id="profile-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="first-name" class="form-label">Nome</label>
+                                <input type="text" id="first-name" name="firstName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name" class="form-label">Sobrenome</label>
+                                <input type="text" id="last-name" name="lastName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" name="email" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" class="form-label">Telefone</label>
+                                <input type="tel" id="phone" name="phone" class="form-input" placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="bio" class="form-label">Biografia</label>
+                                <textarea id="bio" name="bio" class="form-input" rows="4"></textarea>
+                                <span class="form-help">Conte um pouco sobre você e suas preferências imobiliárias</span>
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button type="button" class="button button-secondary" onclick="resetProfileForm()">Cancelar</button>
+                            <button type="submit" class="button button-primary">Salvar Alterações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="password-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Alterar Senha</h2>
+                </div>
+                <div class="card-body">
+                    <form id="password-form">
+                        <div class="form-group">
+                            <label for="current-password" class="form-label">Senha Atual</label>
+                            <input type="password" id="current-password" name="currentPassword" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password" class="form-label">Nova Senha</label>
+                            <input type="password" id="new-password" name="newPassword" class="form-input" required>
+                            <span class="form-help">Mínimo de 8 caracteres, incluindo letra maiúscula, minúscula e número</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password" class="form-label">Confirmar Nova Senha</label>
+                            <input type="password" id="confirm-password" name="confirmPassword" class="form-input" required>
+                        </div>
+                        <div class="button-group">
+                            <button type="button" class="button button-secondary" onclick="resetPasswordForm()">Cancelar</button>
+                            <button type="submit" class="button button-primary">Atualizar Senha</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="notifications-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Notificações</h2>
+                    <button class="button button-secondary" onclick="markAllAsRead()">
+                        Marcar todas como lidas
+                    </button>
+                </div>
+                <div class="card-body">
+                    <ul class="notification-list" id="notification-list">
+                        <!-- Notificações serão carregadas dinamicamente -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="preferences-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Preferências de Comunicação</h2>
+                </div>
+                <div class="card-body">
+                    <div class="preferences-section">
+                        <h3 class="preferences-title">Notificações por Email</h3>
+                        <div class="toggle-group">
+                            <div class="toggle-label">Novos imóveis que correspondem ao meu perfil</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="email-new-properties" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <div class="toggle-label">Alterações de preço em imóveis favoritos</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="email-price-changes" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <div class="toggle-label">Relatórios semanais de matches</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="email-weekly-reports">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="preferences-section">
+                        <h3 class="preferences-title">Notificações no Navegador</h3>
+                        <div class="toggle-group">
+                            <div class="toggle-label">Alertas de novos imóveis</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="browser-new-properties" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <div class="toggle-label">Alterações em imóveis favoritos</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="browser-favorites" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="preferences-section">
+                        <h3 class="preferences-title">Configurações de Privacidade</h3>
+                        <div class="toggle-group">
+                            <div class="toggle-label">Permitir que corretores vejam meu perfil de busca</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="privacy-profile-visible" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <div class="toggle-label">Compartilhar dados anônimos para melhorar recomendações</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="privacy-anonymous-data" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="button button-secondary" onclick="resetPreferences()">Restaurar Padrões</button>
+                        <button type="button" class="button button-primary" onclick="savePreferences()">Salvar Preferências</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="activity-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Atividade Recente</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="activity-list" id="activity-list">
+                        <!-- Atividades serão carregadas dinamicamente -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import permissionService from './services/permission-service.js';
+        import authService from './services/auth-service.js';
+
+        // Verificar autenticação
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!permissionService.isAuthenticated()) {
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+                return;
+            }
+            
+            // Carregar dados do usuário
+            loadUserData();
+            
+            // Carregar notificações
+            loadNotifications();
+            
+            // Carregar atividades
+            loadActivities();
+            
+            // Configurar formulários
+            setupForms();
+        });
+
+        // Carregar dados do usuário
+        async function loadUserData() {
+            try {
+                // Na implementação real, isto seria uma chamada à API
+                // const userData = await authService.fetchAuth('/api/user/profile');
+                
+                // Mock de dados para demonstração
+                const userData = {
+                    firstName: 'João',
+                    lastName: 'Silva',
+                    email: 'joao.silva@exemplo.com',
+                    phone: '(11) 98765-4321',
+                    bio: 'Procurando um imóvel para investimento em áreas de alto potencial de valorização.',
+                    createdAt: '2023-01-15',
+                    profilesCount: 3,
+                    matchesCount: 12
+                };
+                
+                // Preencher dados do perfil
+                document.getElementById('profile-name').textContent = `${userData.firstName} ${userData.lastName}`;
+                document.getElementById('profile-email').textContent = userData.email;
+                document.getElementById('profile-avatar').textContent = userData.firstName.charAt(0) + userData.lastName.charAt(0);
+                
+                document.getElementById('profiles-count').textContent = userData.profilesCount;
+                document.getElementById('matches-count').textContent = userData.matchesCount;
+                
+                const memberSince = new Date(userData.createdAt);
+                document.getElementById('member-since').textContent = memberSince.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                
+                // Preencher formulário
+                document.getElementById('first-name').value = userData.firstName;
+                document.getElementById('last-name').value = userData.lastName;
+                document.getElementById('email').value = userData.email;
+                document.getElementById('phone').value = userData.phone || '';
+                document.getElementById('bio').value = userData.bio || '';
+            } catch (error) {
+                console.error('Erro ao carregar dados do usuário:', error);
+                alert('Erro ao carregar dados do usuário. Por favor, tente novamente.');
+            }
+        }
+
+        // Carregar notificações
+        function loadNotifications() {
+            // Mock de dados para demonstração
+            const notifications = [
+                {
+                    id: 1,
+                    type: 'property',
+                    title: 'Novo imóvel compatível',
+                    message: 'Um novo apartamento na Praia Grande corresponde ao seu perfil de busca.',
+                    time: '2023-05-15T10:30:00',
+                    read: false
+                },
+                {
+                    id: 2,
+                    type: 'price',
+                    title: 'Redução de preço',
+                    message: 'Um imóvel que você favoritou teve redução de preço de 5%.',
+                    time: '2023-05-13T16:45:00',
+                    read: true
+                },
+                {
+                    id: 3,
+                    type: 'system',
+                    title: 'Bem-vindo à Modulari',
+                    message: 'Obrigado por se cadastrar! Complete seu perfil para encontrar imóveis compatíveis.',
+                    time: '2023-05-10T09:15:00',
+                    read: true
+                }
+            ];
+            
+            const notificationList = document.getElementById('notification-list');
+            notificationList.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                notificationList.innerHTML = `
+                    <li class="notification-item">
+                        <div class="notification-content">
+                            <div class="notification-message">Você não tem notificações.</div>
+                        </div>
+                    </li>
+                `;
+                return;
+            }
+            
+            notifications.forEach(notification => {
+                const iconMap = {
+                    'property': '🏠',
+                    'price': '💰',
+                    'system': '⚙️'
+                };
+                
+                const icon = iconMap[notification.type] || '📩';
+                const timeAgo = getTimeAgo(new Date(notification.time));
+                
+                const notificationItem = document.createElement('li');
+                notificationItem.className = `notification-item ${notification.read ? '' : 'unread'}`;
+                notificationItem.innerHTML = `
+                    <div class="notification-icon">${icon}</div>
+                    <div class="notification-content">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-time">${timeAgo}</div>
+                    </div>
+                    ${notification.read ? '' : `<button class="notification-read" onclick="markAsRead(${notification.id})">Marcar como lida</button>`}
+                `;
+                
+                notificationList.appendChild(notificationItem);
+            });
+        }
+
+        // Carregar atividades
+        function loadActivities() {
+            // Mock de dados para demonstração
+            const activities = [
+                {
+                    id: 1,
+                    type: 'login',
+                    description: 'Você fez login na sua conta',
+                    time: '2023-05-15T10:30:00'
+                },
+                {
+                    id: 2,
+                    type: 'match',
+                    description: 'Você deu match em "Apartamento Jardins"',
+                    time: '2023-05-14T16:45:00'
+                },
+                {
+                    id: 3,
+                    type: 'profile',
+                    description: 'Você criou um novo perfil de busca "Investimento na Praia"',
+                    time: '2023-05-13T14:20:00'
+                },
+                {
+                    id: 4,
+                    type: 'view',
+                    description: 'Você visualizou o imóvel "Casa na Praia dos Sonhos"',
+                    time: '2023-05-12T11:50:00'
+                },
+                {
+                    id: 5,
+                    type: 'register',
+                    description: 'Você criou sua conta na Modulari',
+                    time: '2023-05-10T09:15:00'
+                }
+            ];
+            
+            const activityList = document.getElementById('activity-list');
+            activityList.innerHTML = '';
+            
+            if (activities.length === 0) {
+                activityList.innerHTML = `
+                    <li class="activity-item">
+                        <div class="activity-dot"></div>
+                        <div class="activity-text">Nenhuma atividade registrada.</div>
+                    </li>
+                `;
+                return;
+            }
+            
+            activities.forEach(activity => {
+                const time = new Date(activity.time);
+                const formattedDate = time.toLocaleDateString('pt-BR') + ' ' + 
+                                     time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                
+                const activityItem = document.createElement('li');
+                activityItem.className = 'activity-item';
+                activityItem.innerHTML = `
+                    <div class="activity-dot"></div>
+                    <div class="activity-time">${formattedDate}</div>
+                    <div class="activity-text">${activity.description}</div>
+                `;
+                
+                activityList.appendChild(activityItem);
+            });
+        }
+
+        // Configurar formulários
+        function setupForms() {
+            // Formulário de perfil
+            document.getElementById('profile-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const formData = {
+                    firstName: document.getElementById('first-name').value,
+                    lastName: document.getElementById('last-name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    bio: document.getElementById('bio').value
+                };
+                
+                saveProfileData(formData);
+            });
+            
+            // Formulário de senha
+            document.getElementById('password-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                if (newPassword !== confirmPassword) {
+                    alert('As senhas não coincidem. Por favor, tente novamente.');
+                    return;
+                }
+                
+                changePassword(currentPassword, newPassword);
+            });
+        }
+
+        // Salvar dados do perfil
+        async function saveProfileData(formData) {
+            try {
+                // Na implementação real, isto seria uma chamada à API
+                // await authService.fetchAuth('/api/user/profile', {
+                //     method: 'PUT',
+                //     body: JSON.stringify(formData)
+                // });
+                
+                // Simulação para demonstração
+                alert('Perfil atualizado com sucesso!');
+                
+                // Atualizar UI
+                document.getElementById('profile-name').textContent = `${formData.firstName} ${formData.lastName}`;
+                document.getElementById('profile-email').textContent = formData.email;
+                document.getElementById('profile-avatar').textContent = formData.firstName.charAt(0) + formData.lastName.charAt(0);
+            } catch (error) {
+                console.error('Erro ao salvar dados do perfil:', error);
+                alert('Erro ao salvar dados do perfil. Por favor, tente novamente.');
+            }
+        }
+
+        // Alterar senha
+        async function changePassword(currentPassword, newPassword) {
+            try {
+                // Na implementação real, isto seria uma chamada à API
+                // await authService.fetchAuth('/api/user/change-password', {
+                //     method: 'POST',
+                //     body: JSON.stringify({
+                //         currentPassword,
+                //         newPassword
+                //     })
+                // });
+                
+                // Simulação para demonstração
+                alert('Senha alterada com sucesso!');
+                resetPasswordForm();
+            } catch (error) {
+                console.error('Erro ao alterar senha:', error);
+                alert('Erro ao alterar senha. Por favor, verifique a senha atual e tente novamente.');
+            }
+        }
+
+        // Marcar notificação como lida
+        window.markAsRead = async function(notificationId) {
+            try {
+                // Na implementação real, isto seria uma chamada à API
+                // await authService.fetchAuth(`/api/notifications/${notificationId}/read`, {
+                //     method: 'POST'
+                // });
+                
+                // Simulação para demonstração
+                loadNotifications();
+            } catch (error) {
+                console.error('Erro ao marcar notificação como lida:', error);
+            }
+        };
+
+        // Marcar todas notificações como lidas
+        window.markAllAsRead = async function() {
+            try {
+                // Na implementação real, isto seria uma chamada à API
+                // await authService.fetchAuth('/api/notifications/read-all', {
+                //     method: 'POST'
+                // });
+                
+                // Simulação para demonstração
+                loadNotifications();
+            } catch (error) {
+                console.error('Erro ao marcar todas notificações como lidas:', error);
+            }
+        };
+
+        // Salvar preferências
+        window.savePreferences = function() {
+            const preferences = {
+                email: {
+                    newProperties: document.getElementById('email-new-properties').checked,
+                    priceChanges: document.getElementById('email-price-changes').checked,
+                    weeklyReports: document.getElementById('email-weekly-reports').checked
+                },
+                browser: {
+                    newProperties: document.getElementById('browser-new-properties').checked,
+                    favorites: document.getElementById('browser-favorites').checked
+                },
+                privacy: {
+                    profileVisible: document.getElementById('privacy-profile-visible').checked,
+                    anonymousData: document.getElementById('privacy-anonymous-data').checked
+                }
+            };
+            
+            // Na implementação real, isto seria uma chamada à API
+            // authService.fetchAuth('/api/user/preferences', {
+            //     method: 'PUT',
+            //     body: JSON.stringify(preferences)
+            // });
+            
+            // Simulação para demonstração
+            alert('Preferências salvas com sucesso!');
+        };
+
+        // Restaurar preferências padrão
+        window.resetPreferences = function() {
+            document.getElementById('email-new-properties').checked = true;
+            document.getElementById('email-price-changes').checked = true;
+            document.getElementById('email-weekly-reports').checked = false;
+            document.getElementById('browser-new-properties').checked = true;
+            document.getElementById('browser-favorites').checked = true;
+            document.getElementById('privacy-profile-visible').checked = true;
+            document.getElementById('privacy-anonymous-data').checked = true;
+        };
+
+        // Resetar formulário de perfil
+        window.resetProfileForm = function() {
+            loadUserData();
+        };
+
+        // Resetar formulário de senha
+        window.resetPasswordForm = function() {
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        };
+
+        // Alternar entre abas
+        window.switchTab = function(tabId) {
+            // Desativar todas as abas
+            document.querySelectorAll('.tab-button').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Ativar aba selecionada
+            document.querySelector(`.tab-button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        };
+
+        // Função auxiliar para formatar tempo relativo
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) {
+                return 'agora mesmo';
+            }
+            
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+            if (diffInMinutes < 60) {
+                return `${diffInMinutes} ${diffInMinutes === 1 ? 'minuto' : 'minutos'} atrás`;
+            }
+            
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours < 24) {
+                return `${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'} atrás`;
+            }
+            
+            const diffInDays = Math.floor(diffInHours / 24);
+            if (diffInDays < 30) {
+                return `${diffInDays} ${diffInDays === 1 ? 'dia' : 'dias'} atrás`;
+            }
+            
+            const diffInMonths = Math.floor(diffInDays / 30);
+            if (diffInMonths < 12) {
+                return `${diffInMonths} ${diffInMonths === 1 ? 'mês' : 'meses'} atrás`;
+            }
+            
+            const diffInYears = Math.floor(diffInMonths / 12);
+            return `${diffInYears} ${diffInYears === 1 ? 'ano' : 'anos'} atrás`;
+        }
+    </script>
+</body>
+</html>

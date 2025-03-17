@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Detalhes do Imóvel</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        .property-header {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .property-header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: var(--spacing-xl);
+            color: var(--surface);
+        }
+
+        .property-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: var(--spacing-xs);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .property-price {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .property-location {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-size: 1.1rem;
+            margin-bottom: var(--spacing-sm);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .property-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .property-tag {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+        }
+
+        .property-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .action-button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .match-badge {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            background: var(--primary);
+            color: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .match-badge.high-match {
+            background: linear-gradient(135deg, var(--primary), #4a6fa5);
+            animation: pulse 2s infinite;
+        }
+
+        .content-section {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .detail-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .detail-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-sm);
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--surface-alt);
+            border-radius: var(--radius-sm);
+        }
+
+        .feature-icon {
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .match-details {
+            background: var(--surface-alt);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .match-reason {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+        }
+
+        .match-icon {
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .match-description strong {
+            color: var(--primary);
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .gallery-image:hover {
+            transform: scale(1.05);
+        }
+
+        .notes-section {
+            margin-top: var(--spacing-lg);
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-top: var(--spacing-sm);
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .similar-properties {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .property-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .property-card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .property-card-content {
+            padding: var(--spacing-sm);
+        }
+
+        .property-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .property-card-price {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--success);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .property-header {
+                height: 40vh;
+                min-height: 300px;
+            }
+
+            .property-title {
+                font-size: 1.75rem;
+            }
+
+            .property-price {
+                font-size: 1.25rem;
+            }
+
+            .property-actions {
+                flex-direction: column;
+            }
+
+            .action-button {
+                width: 100%;
+            }
+
+            .details-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">Modulari</h1>
+                <button class="button button-secondary" onclick="goBack()">
+                    Voltar
+                </button>
+            </div>
+        </header>
+
+        <div id="property-container">
+            <!-- Conteúdo será carregado dinamicamente -->
+        </div>
+    </div>
+
+    <!-- Modais -->
+    <div class="modal" id="share-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Compartilhar Imóvel</h3>
+                <button class="modal-close" onclick="closeModal('share-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Escolha como compartilhar este imóvel:</p>
+                <div style="display: flex; flex-direction: column; gap: var(--spacing-sm); margin: var(--spacing-md) 0;">
+                    <button class="button button-primary" onclick="shareViaWhatsApp()">
+                        WhatsApp
+                    </button>
+                    <button class="button button-primary" onclick="shareViaEmail()">
+                        Email
+                    </button>
+                    <button class="button button-primary" onclick="copyLink()">
+                        Copiar Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script type="module">
+        import dataService from './data-service.js';
+        import permissionService from './permission-service.js';
+
+        // Verificar autenticação
+        document.addEventListener('DOMContentLoaded', function() {
+            showLoading();
+            
+            // Verificar se há uma propriedade selecionada
+            const currentProperty = dataService.getCurrentProperty();
+            
+            // Se não houver, tentar obter de query params
+            if (!currentProperty) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const propertyId = urlParams.get('id');
+                
+                if (propertyId) {
+                    const property = dataService.getPropertyById(propertyId);
+                    if (property) {
+                        dataService.setCurrentProperty(property);
+                        loadPropertyDetails(property);
+                    } else {
+                        showError('Imóvel não encontrado');
+                    }
+                } else {
+                    showError('Nenhum imóvel selecionado');
+                }
+            } else {
+                loadPropertyDetails(currentProperty);
+            }
+        });
+
+        // Função para mostrar loading
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.add('show');
+        }
+
+        // Função para esconder loading
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.remove('show');
+        }
+
+        // Função para mostrar erro
+        function showError(message) {
+            hideLoading();
+            document.getElementById('property-container').innerHTML = `
+                <div class="content-section" style="text-align: center; padding: var(--spacing-xl);">
+                    <h2 style="margin-bottom: var(--spacing-md); color: var(--text);">${message}</h2>
+                    <p style="margin-bottom: var(--spacing-lg); color: var(--text-light);">
+                        Não foi possível carregar os detalhes do imóvel.
+                    </p>
+                    <button class="button button-primary" onclick="window.location.href='property-cards.html'">
+                        Explorar imóveis
+                    </button>
+                </div>
+            `;
+        }
+
+        // Função para carregar detalhes do imóvel
+        function loadPropertyDetails(property) {
+            try {
+                if (!property) {
+                    showError('Imóvel não encontrado');
+                    return;
+                }
+                
+                // Calcular match score
+                const activeProfile = dataService.getActiveProfile();
+                let matchScore = 0;
+                let matchReasons = [];
+                
+                if (activeProfile) {
+                    matchScore = dataService.calculateMatchScore(property, activeProfile.preferences);
+                    matchReasons = generateMatchReasons(property, activeProfile.preferences);
+                }
+                
+                // Carregar notas salvas
+                let savedNotes = '';
+                if (activeProfile) {
+                    const matches = dataService.getProfileMatches(activeProfile.id);
+                    const savedMatch = matches.find(m => m.id === property.id);
+                    if (savedMatch) {
+                        savedNotes = savedMatch.notes || '';
+                    }
+                }
+                
+                // Extrair características principais para o topo
+                const size = property.features.find(f => f.includes('m²')) || 'Área não informada';
+                const bedrooms = property.features.find(f => f.includes('quarto')) || 'Quartos não informados';
+                const location = property.details.location || 'Localização não informada';
+                
+                // Gerar detalhes HTML
+                document.getElementById('property-container').innerHTML = `
+                    <div class="property-header" style="background-image: url('${property.image}');">
+                        <div class="property-header-overlay">
+                            <h1 class="property-title">${property.title}</h1>
+                            <p class="property-price">${property.price}</p>
+                            <div class="property-location">
+                                <span>📍</span> ${property.details.address || location}
+                            </div>
+                            <div class="property-tags">
+                                ${property.features.slice(0, 4).map(feature => `
+                                    <span class="property-tag">${feature}</span>
+                                `).join('')}
+                            </div>
+                            <div class="property-actions">
+                                <button class="action-button" style="background: var(--surface); color: var(--text);" 
+                                        onclick="scheduleVisit()">
+                                    <span>📅</span> Agendar Visita
+                                </button>
+                                <button class="action-button" style="background: var(--success); color: var(--surface);" 
+                                        onclick="saveProperty(${property.id})">
+                                    <span>💖</span> Salvar
+                                </button>
+                                <button class="action-button" style="background: var(--primary); color: var(--surface);" 
+                                        onclick="openShareModal()">
+                                    <span>📤</span> Compartilhar
+                                </button>
+                            </div>
+                            ${matchScore > 0 ? `
+                                <div class="match-badge ${matchScore > 85 ? 'high-match' : ''}">
+                                    <span>🎯</span> ${matchScore}% match
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: var(--spacing-lg);">
+                        <div class="content-section">
+                            <h2 class="section-title">
+                                <span>📋</span> Detalhes do Imóvel
+                            </h2>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-icon">📏</span>
+                                    <span class="detail-value">${size}</span>
+                                    <span class="detail-label">Área Total</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">🛏️</span>
+                                    <span class="detail-value">${bedrooms}</span>
+                                    <span class="detail-label">Dormitórios</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">🏙️</span>
+                                    <span class="detail-value">${location}</span>
+                                    <span class="detail-label">Localização</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">🔊</span>
+                                    <span class="detail-value">${getNoiseLevelText(property.details.noiseLevel)}</span>
+                                    <span class="detail-label">Nível de Ruído</span>
+                                </div>
+                            </div>
+                            
+                            <h3 class="section-title" style="font-size: 1.2rem;">
+                                <span>✨</span> Características
+                            </h3>
+                            <div class="features-grid">
+                                ${property.features.map(feature => `
+                                    <div class="feature-item">
+                                        <span class="feature-icon">${getFeatureIcon(feature)}</span>
+                                        <span>${feature}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            ${matchReasons.length > 0 ? `
+                                <div class="match-details">
+                                    <h3 class="section-title" style="font-size: 1.2rem; margin-bottom: var(--spacing-sm);">
+                                        <span>🎯</span> Por que este imóvel combina com você
+                                    </h3>
+                                    ${matchReasons.map(reason => `
+                                        <div class="match-reason">
+                                            <span class="match-icon">${reason.icon}</span>
+                                            <div class="match-description">${reason.text}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="content-section">
+                            <h2 class="section-title">
+                                <span>📝</span> Descrição
+                            </h2>
+                            <p>${property.details.description || 'Descrição não disponível.'}</p>
+                            
+                            <div class="image-gallery">
+                                <!-- Simulação de mais imagens -->
+                                <img src="${property.image}" alt="${property.title}" class="gallery-image">
+                                <img src="${property.image}" alt="${property.title}" class="gallery-image">
+                                <img src="${property.image}" alt="${property.title}" class="gallery-image">
+                                <img src="${property.image}" alt="${property.title}" class="gallery-image">
+                            </div>
+                        </div>
+                        
+                        ${activeProfile ? `
+                            <div class="content-section notes-section">
+                                <h2 class="section-title">
+                                    <span>📋</span> Suas Anotações
+                                </h2>
+                                <textarea 
+                                    class="notes-textarea" 
+                                    id="property-notes" 
+                                    placeholder="Adicione suas observações sobre este imóvel..."
+                                    onchange="saveNotes(event.target.value, ${property.id})"
+                                >${savedNotes}</textarea>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="content-section">
+                            <h2 class="section-title">
+                                <span>🏠</span> Imóveis Similares
+                            </h2>
+                            <div class="similar-properties" id="similar-properties">
+                                <!-- Será preenchido dinamicamente -->
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Carregar imóveis similares
+                loadSimilarProperties(property);
+                
+                hideLoading();
+            } catch (error) {
+                console.error('Erro ao carregar detalhes:', error);
+                showError('Erro ao carregar detalhes do imóvel');
+            }
+        }
+
+        // Função para carregar imóveis similares
+        function loadSimilarProperties(currentProperty) {
+            try {
+                // Obter imóveis do mesmo tipo/localização
+                const lifestyle = dataService.getSelectedLifestyle() || 'beach';
+                let similarProperties = dataService.getPropertiesByLifestyle(lifestyle);
+                
+                // Filtrar o imóvel atual
+                similarProperties = similarProperties.filter(p => p.id !== currentProperty.id);
+                
+                // Limitar a 3 imóveis
+                similarProperties = similarProperties.slice(0, 3);
+                
+                if (similarProperties.length === 0) {
+                    document.getElementById('similar-properties').innerHTML = `
+                        <p>Nenhum imóvel similar encontrado.</p>
+                    `;
+                    return;
+                }
+                
+                // Renderizar imóveis similares
+                document.getElementById('similar-properties').innerHTML = similarProperties.map(property => `
+                    <div class="property-card" onclick="viewProperty(${property.id})">
+                        <img src="${property.image}" alt="${property.title}" class="property-card-image">
+                        <div class="property-card-content">
+                            <h3 class="property-card-title">${property.title}</h3>
+                            <p class="property-card-price">${property.price}</p>
+                            <div class="property-tags" style="margin: 0;">
+                                ${property.features.slice(0, 2).map(feature => `
+                                    <span class="property-tag" style="background: var(--surface-alt);">${feature}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar imóveis similares:', error);
+                document.getElementById('similar-properties').innerHTML = `
+                    <p>Erro ao carregar imóveis similares.</p>
+                `;
+            }
+        }
+
+        // Função para gerar razões de match
+        function generateMatchReasons(property, preferences) {
+            if (!preferences) return [];
+            
+            const reasons = [];
+            
+            // Verificar propósito
+            if (preferences.purpose === 'invest' && property.details.investmentPotential) {
+                reasons.push({
+                    icon: '💰',
+                    text: 'Este imóvel tem <strong>alto potencial de valorização</strong>, ideal para seu objetivo de investimento.'
+                });
+            } else if (preferences.purpose === 'live' && property.features.includes('Área tranquila')) {
+                reasons.push({
+                    icon: '🏡',
+                    text: 'Este imóvel está em uma <strong>área tranquila</strong>, perfeito para seu objetivo de moradia.'
+                });
+            } else if (preferences.purpose === 'both' && 
+                      property.details.investmentPotential && 
+                      property.features.includes('Área tranquila')) {
+                reasons.push({
+                    icon: '⚖️',
+                    text: 'Este imóvel combina <strong>potencial de investimento</strong> e <strong>qualidade para moradia</strong>, atendendo seu objetivo duplo.'
+                });
+            }
+
+            // Verificar estilo de vida
+            if (preferences.lifestyle === 'quiet' && 
+                (property.details.noiseLevel === 'low' || property.details.noiseLevel === 'very_low')) {
+                reasons.push({
+                    icon: '🌿',
+                    text: 'O <strong>ambiente tranquilo</strong> deste imóvel combina com sua preferência por locais calmos.'
+                });
+            } else if (preferences.lifestyle === 'active' && property.details.nearActivities) {
+                reasons.push({
+                    icon: '🏙️',
+                    text: 'A <strong>proximidade a atividades e serviços</strong> atende sua preferência por um estilo de vida ativo.'
+                });
+            } else if (preferences.lifestyle === 'balanced') {
+                if (property.features.includes('Próximo ao centro') && 
+                    property.features.includes('Área tranquila')) {
+                    reasons.push({
+                        icon: '☯️',
+                        text: 'Este imóvel oferece um <strong>equilíbrio entre tranquilidade e proximidade a serviços</strong>, ideal para seu estilo de vida balanceado.'
+                    });
+                }
+            }
+
+            // Verificar prioridades
+            if (preferences.priorities) {
+                const size = parseInt(property.features.find(f => f.includes('m²'))?.replace(/\D/g, '') || '0');
+                
+                if (preferences.priorities.includes('space') && size > 150) {
+                    reasons.push({
+                        icon: '📏',
+                        text: `Com <strong>${size}m²</strong>, este imóvel atende sua prioridade por espaços amplos.`
+                    });
+                }
+                
+                if (preferences.priorities.includes('location') && 
+                    (property.details.location.includes('Primeira quadra') || 
+                     property.details.location.includes('Centro'))) {
+                    reasons.push({
+                        icon: '📍',
+                        text: `A <strong>localização privilegiada</strong> em ${property.details.location} combina com suas prioridades.`
+                    });
+                }
+                
+                if (preferences.priorities.includes('privacy') && 
+                    property.features.includes('Condomínio fechado')) {
+                    reasons.push({
+                        icon: '🔒',
+                        text: 'Este imóvel está em um <strong>condomínio fechado</strong>, oferecendo a privacidade que você valoriza.'
+                    });
+                }
+                
+                if (preferences.priorities.includes('amenities') && 
+                    (property.features.includes('Academia') || 
+                     property.features.includes('Piscina'))) {
+                    const amenities = [];
+                    if (property.features.includes('Academia')) amenities.push('academia');
+                    if (property.features.includes('Piscina')) amenities.push('piscina');
+                    
+                    reasons.push({
+                        icon: '✨',
+                        text: `As <strong>comodidades</strong> como ${amenities.join(' e ')} atendem às suas prioridades.`
+                    });
+                }
+            }
+
+            // Limitar a 3 razões para não sobrecarregar
+            return reasons.slice(0, 3);
+        }
+
+        // Função para obter ícone baseado na característica
+        function getFeatureIcon(feature) {
+            if (feature.toLowerCase().includes('quarto')) return '🛏️';
+            if (feature.toLowerCase().includes('m²')) return '📏';
+            if (feature.toLowerCase().includes('piscina')) return '🏊';
+            if (feature.toLowerCase().includes('academia')) return '🏋️';
+            if (feature.toLowerCase().includes('vista')) return '🌅';
+            if (feature.toLowerCase().includes('varanda')) return '🏞️';
+            if (feature.toLowerCase().includes('tranquila')) return '🌿';
+            if (feature.toLowerCase().includes('área verde')) return '🌳';
+            if (feature.toLowerCase().includes('condomínio')) return '🏢';
+            if (feature.toLowerCase().includes('mar')) return '🌊';
+            if (feature.toLowerCase().includes('centro')) return '🏙️';
+            if (feature.toLowerCase().includes('próximo')) return '🚶';
+            if (feature.toLowerCase().includes('potencial')) return '💰';
+            
+            return '✨'; // ícone padrão
+        }
+
+        // Função para obter texto do nível de ruído
+        function getNoiseLevelText(level) {
+            switch (level) {
+                case 'very_low': return 'Muito Baixo';
+                case 'low': return 'Baixo';
+                case 'medium': return 'Médio';
+                case 'high': return 'Alto';
+                default: return 'Não informado';
+            }
+        }
+
+        // Exportar funções para o escopo global
+        window.viewProperty = function(propertyId) {
+            const property = dataService.getPropertyById(propertyId);
+            if (property) {
+                dataService.setCurrentProperty(property);
+                window.location.reload();
+            }
+        };
+
+        window.saveProperty = function(propertyId) {
+            const activeProfile = dataService.getActiveProfile();
+            
+            if (!activeProfile) {
+                showToast('É necessário ter um perfil ativo para salvar imóveis', 'warning');
+                return;
+            }
+            
+            const property = dataService.getPropertyById(propertyId);
+            if (!property) {
+                showToast('Imóvel não encontrado', 'error');
+                return;
+            }
+            
+            // Verificar se já está salvo
+            const matches = dataService.getProfileMatches(activeProfile.id);
+            if (matches.some(m => m.id === propertyId)) {
+                showToast('Este imóvel já está salvo nos seus matches', 'warning');
+                return;
+            }
+            
+            // Adicionar match
+            property.match = dataService.calculateMatchScore(property, activeProfile.preferences);
+            const result = dataService.addMatch(activeProfile.id, property);
+            
+            if (result) {
+                showToast('Imóvel salvo com sucesso!', 'success');
+            } else {
+                showToast('Erro ao salvar imóvel', 'error');
+            }
+        };
+
+        window.saveNotes = function(notes, propertyId) {
+            const activeProfile = dataService.getActiveProfile();
+            
+            if (!activeProfile) {
+                showToast('É necessário ter um perfil ativo para salvar anotações', 'warning');
+                return;
+            }
+            
+            // Verificar se já está salvo
+            const matches = dataService.getProfileMatches(activeProfile.id);
+            const existingMatch = matches.find(m => m.id === propertyId);
+            
+            if (existingMatch) {
+                // Atualizar notas do match existente
+                dataService.updateMatch(activeProfile.id, propertyId, { notes });
+                showToast('Anotações salvas com sucesso!', 'success');
+            } else {
+                // Salvar o imóvel primeiro
+                saveProperty(propertyId);
+                // Tentar novamente depois que o imóvel for salvo
+                setTimeout(() => {
+                    const property = dataService.getPropertyById(propertyId);
+                    if (property) {
+                        property.match = dataService.calculateMatchScore(property, activeProfile.preferences);
+                        const match = dataService.addMatch(activeProfile.id, property);
+                        if (match) {
+                            dataService.updateMatch(activeProfile.id, propertyId, { notes });
+                        }
+                    }
+                }, 100);
+            }
+        };
+
+        window.scheduleVisit = function() {
+            showToast('Agendamento de visitas em breve!', 'info');
+        };
+
+        window.openShareModal = function() {
+            document.getElementById('share-modal').style.display = 'flex';
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        };
+
+        window.shareViaWhatsApp = function() {
+            const property = dataService.getCurrentProperty();
+            if (!property) return;
+            
+            const text = `Olha que imóvel interessante que encontrei no Modulari!\n\n${property.title}\n${property.price}\n\n${property.details.description?.substring(0, 100)}...\n\nVeja mais detalhes: ${window.location.href}`;
+            
+            const encodedText = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+            
+            closeModal('share-modal');
+        };
+
+        window.shareViaEmail = function() {
+            const property = dataService.getCurrentProperty();
+            if (!property) return;
+            
+            const subject = `Imóvel interessante: ${property.title}`;
+            const body = `Olha que imóvel interessante que encontrei no Modulari!\n\n${property.title}\n${property.price}\n\n${property.details.description?.substring(0, 100)}...\n\nVeja mais detalhes: ${window.location.href}`;
+            
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
+            
+            closeModal('share-modal');
+        };
+
+        window.copyLink = function() {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    showToast('Link copiado para a área de transferência!', 'success');
+                    closeModal('share-modal');
+                })
+                .catch(() => {
+                    // Fallback para navegadores que não suportam clipboard API
+                    const input = document.createElement('input');
+                    input.value = window.location.href;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                    
+                    showToast('Link copiado para a área de transferência!', 'success');
+                    closeModal('share-modal');
+                });
+        };
+
+        window.goBack = function() {
+            // Se houver histórico, volta
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Caso contrário, vai para a página de cards
+                window.location.href = 'property-cards.html';
+            }
+        };
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span class="toast-message">${message}</span>
+            `;
+            
+            const container = document.getElementById('toast-container');
+            container.appendChild(toast);
+            
+            // Remover após 3 segundos
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

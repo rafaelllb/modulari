@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Busca Tradicional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-group {
+            margin-bottom: 24px;
+        }
+
+        .filter-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .filter-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            background: white;
+        }
+
+        .price-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .results-section {
+            display: grid;
+            /*grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));*/
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .property-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .property-card.loading {
+            min-height: 300px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        .property-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .property-content {
+            padding: 16px;
+        }
+
+        .property-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .property-price {
+            color: #059669;
+            font-weight: 500;
+            font-size: 1.125rem;
+            margin-bottom: 12px;
+        }
+
+        .property-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .feature-tag {
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: #475569;
+        }
+
+        .button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .primary-button {
+            background: #2563eb;
+            color: white;
+            width: 100%;
+        }
+
+        .primary-button:hover {
+            background: #1d4ed8;
+        }
+
+        .filters-toggle {
+            display: none;
+        }
+
+        .filter-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        @media (min-width: 640px) {
+            .results-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .results-section {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filters-toggle {
+                display: block;
+                margin-bottom: 16px;
+            }
+
+            .filters-section {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1000;
+                background: white;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .filters-section.show {
+                display: block;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">Modulari</h1>
+        </header>
+
+        <button class="button filters-toggle" onclick="toggleFilters()">
+            Mostrar/Ocultar Filtros
+        </button>
+
+        <div class="filters-section" id="filters">
+            <div class="filter-group">
+                <h3 class="filter-title">Localização</h3>
+                <div class="filter-options">
+                    <select class="filter-select" onchange="applyFilters()">
+                        <option value="">Todas as regiões</option>
+                        <option value="beach">Praia</option>
+                        <option value="city">Cidade</option>
+                        <option value="countryside">Campo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3 class="filter-title">Tipo de Imóvel</h3>
+                <div class="filter-options">
+                    <select class="filter-select" onchange="applyFilters()">
+                        <option value="">Todos os tipos</option>
+                        <option value="apartment">Apartamento</option>
+                        <option value="house">Casa</option>
+                        <option value="mansion">Mansão</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3 class="filter-title">Preço</h3>
+                <div class="price-range">
+                    <input type="number" 
+                           class="filter-input" 
+                           placeholder="Mínimo"
+                           onchange="applyFilters()">
+                    <input type="number" 
+                           class="filter-input" 
+                           placeholder="Máximo"
+                           onchange="applyFilters()">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3 class="filter-title">Características</h3>
+                <div class="filter-options">
+                    <label class="checkbox-group">
+                        <input type="checkbox" onchange="applyFilters()">
+                        Piscina
+                    </label>
+                    <label class="checkbox-group">
+                        <input type="checkbox" onchange="applyFilters()">
+                        Academia
+                    </label>
+                    <label class="checkbox-group">
+                        <input type="checkbox" onchange="applyFilters()">
+                        Vista para o mar
+                    </label>
+                    <label class="checkbox-group">
+                        <input type="checkbox" onchange="applyFilters()">
+                        Área verde
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" class="results-section">
+            <!-- Os resultados serão inseridos aqui via JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Carregar todos os imóveis de todas as localizações
+        const allProperties = Object.values(propertiesData).flat();
+
+        function applyFilters() {
+            showLoadingResults();
+            try {
+                await new Promise(resolve => setTimeout(resolve, 800));
+                const region = document.querySelector('select').value;
+                const priceMin = parseFloat(document.querySelector('input[placeholder="Mínimo"]').value) || 0;
+                const priceMax = parseFloat(document.querySelector('input[placeholder="Máximo"]').value) || Infinity;
+                
+                let filteredProperties = allProperties;
+
+                // Aplicar filtro de região
+                if (region) {
+                    filteredProperties = filteredProperties.filter(p => propertiesData[region].includes(p));
+                }
+
+                // Aplicar filtro de preço
+                filteredProperties = filteredProperties.filter(p => {
+                    const price = parseFloat(p.price.replace(/[^0-9]/g, ''));
+                    return price >= priceMin && price <= priceMax;
+                });
+
+                // Aplicar filtros de características
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+                checkboxes.forEach(checkbox => {
+                    const feature = checkbox.parentElement.textContent.trim();
+                    filteredProperties = filteredProperties.filter(p => 
+                        p.features.some(f => f.toLowerCase().includes(feature.toLowerCase()))
+                    );
+                });
+
+                if (filteredProperties.length === 0) {
+                    showEmptyResults();
+                } else {
+                    renderResults(filteredProperties);
+                }
+            } catch (error) {
+                console.error('Error applying filters:', error);
+                showEmptyResults();
+            }
+        }
+
+        function showLoadingResults() {
+            const results = document.getElementById('results');
+            results.innerHTML = Array(6).fill().map(() => `
+                <div class="property-card loading"></div>
+            `).join('');
+        }
+
+        function showEmptyResults() {
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <div class="empty-state">
+                <h3>Nenhum imóvel encontrado</h3>
+                <p>Tente ajustar seus filtros de busca</p>
+                </div>
+            `;
+        }
+
+        function renderResults(properties) {
+            const resultsContainer = document.getElementById('results');
+            
+            if (properties.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 48px;">
+                        <h3>Nenhum imóvel encontrado</h3>
+                        <p>Tente ajustar seus filtros</p>
+                    </div>
+                `;
+                return;
+            }
+
+            resultsContainer.innerHTML = properties.map(property => `
+                <div class="property-card">
+                    <img src="${property.image}" alt="${property.title}" class="property-image">
+                    <div class="property-content">
+                        <h3 class="property-title">${property.title}</h3>
+                        <p class="property-price">${property.price}</p>
+                        <div class="property-features">
+                            ${property.features.map(feature => `
+                                <span class="feature-tag">${feature}</span>
+                            `).join('')}
+                        </div>
+                        <button class="button primary-button" 
+                                onclick="viewDetails(${property.id})">
+                            Ver detalhes
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewDetails(propertyId) {
+            const property = allProperties.find(p => p.id === propertyId);
+            if (property) {
+                localStorage.setItem('currentProperty', JSON.stringify(property));
+                window.location.href = 'property-details.html';
+            }
+        }
+
+        function toggleFilters() {
+            const filters = document.getElementById('filters');
+            filters.classList.toggle('show');
+        }
+
+        // Inicializar com todos os imóveis
+        renderResults(allProperties);
+    </script>
+</body>
+</html>

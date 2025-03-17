@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Registro</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        body {
+            background-color: var(--surface-alt);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md) 0;
+        }
+
+        .auth-container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-md);
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .auth-title {
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .form-input {
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26, 54, 93, 0.1);
+        }
+
+        .password-requirements {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: var(--spacing-xs);
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-top: 2px;
+        }
+
+        .requirement-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: var(--surface);
+            background: var(--text-light);
+        }
+
+        .requirement.valid .requirement-icon {
+            background: #10B981;
+        }
+
+        .terms-agreement {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .terms-agreement input {
+            margin-top: 3px;
+        }
+
+        .button {
+            padding: var(--spacing-sm);
+            font-size: 1rem;
+        }
+
+        .auth-separator {
+            display: flex;
+            align-items: center;
+            margin: var(--spacing-md) 0;
+            color: var(--text-light);
+        }
+
+        .auth-separator::before,
+        .auth-separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .auth-separator span {
+            padding: 0 var(--spacing-sm);
+            font-size: 0.875rem;
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .social-button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .social-button:hover {
+            background: var(--surface-alt);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: var(--spacing-lg);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.1);
+            color: rgb(220, 38, 38);
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            margin-bottom: var(--spacing-sm);
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-logo">
+            <h1 class="logo">Modulari</h1>
+        </div>
+        
+        <h2 class="auth-title">Crie sua conta</h2>
+        <p class="auth-subtitle">Encontre o imóvel dos seus sonhos</p>
+        
+        <div id="error-message" class="error-message">
+            Houve um erro no cadastro. Por favor, verifique os dados e tente novamente.
+        </div>
+        
+        <form class="auth-form" id="register-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first-name" class="form-label">Nome</label>
+                    <input type="text" id="first-name" name="firstName" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="last-name" class="form-label">Sobrenome</label>
+                    <input type="text" id="last-name" name="lastName" class="form-input" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" id="password" name="password" class="form-input" required 
+                       onkeyup="checkPasswordStrength()">
+                
+                <div class="password-requirements">
+                    <div class="requirement" id="req-length">
+                        <span class="requirement-icon">✓</span>
+                        <span>Pelo menos 8 caracteres</span>
+                    </div>
+                    <div class="requirement" id="req-uppercase">
+                        <span class="requirement-icon">✓</span>
+                        <span>Pelo menos 1 letra maiúscula</span>
+                    </div>
+                    <div class="requirement" id="req-lowercase">
+                        <span class="requirement-icon">✓</span>
+                        <span>Pelo menos 1 letra minúscula</span>
+                    </div>
+                    <div class="requirement" id="req-number">
+                        <span class="requirement-icon">✓</span>
+                        <span>Pelo menos 1 número</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm-password" class="form-label">Confirme a senha</label>
+                <input type="password" id="confirm-password" name="confirmPassword" class="form-input" required
+                       onkeyup="checkPasswordMatch()">
+            </div>
+            
+            <div class="terms-agreement">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">
+                    Eu concordo com os <a href="#" class="link">Termos de Uso</a> e 
+                    <a href="#" class="link">Política de Privacidade</a> da Modulari.
+                </label>
+            </div>
+            
+            <button type="submit" class="button button-primary" id="register-button" disabled>
+                Criar conta
+            </button>
+        </form>
+        
+        <div class="auth-separator">
+            <span>ou</span>
+        </div>
+        
+        <div class="social-buttons">
+            <button class="social-button" onclick="socialRegister('google')">
+                <span>G</span> Google
+            </button>
+            <button class="social-button" onclick="socialRegister('facebook')">
+                <span>f</span> Facebook
+            </button>
+        </div>
+        
+        <div class="auth-footer">
+            <p>Já possui uma conta? <a href="login.html">Faça login</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const terms = document.getElementById('terms').checked;
+            
+            if (!terms) {
+                alert('Você precisa aceitar os termos para continuar.');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                document.getElementById('error-message').textContent = 'As senhas não coincidem.';
+                document.getElementById('error-message').style.display = 'block';
+                return;
+            }
+            
+            // Aqui seria a chamada para a API de registro
+            registerUser(firstName, lastName, email, password);
+        });
+        
+        function registerUser(firstName, lastName, email, password) {
+            // Simulação de registro - na implementação real, este seria um fetch para a API
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    firstName,
+                    lastName,
+                    email,
+                    password
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Falha no registro');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Redirecionar para a página de login ou iniciar sessão
+                window.location.href = 'login.html?registered=true';
+            })
+            .catch(error => {
+                document.getElementById('error-message').style.display = 'block';
+                console.error('Erro de registro:', error);
+            });
+            
+            // TEMPORÁRIO: Para demonstração, vamos simular um registro bem-sucedido
+            // Em produção, este código seria removido
+            window.location.href = 'login.html?registered=true';
+        }
+        
+        function socialRegister(provider) {
+            // Implementação de registro com provedor social
+            alert(`Registro com ${provider} será implementado.`);
+        }
+        
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            
+            // Verificar requisitos
+            const hasLength = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            
+            // Atualizar indicadores visuais
+            document.getElementById('req-length').classList.toggle('valid', hasLength);
+            document.getElementById('req-uppercase').classList.toggle('valid', hasUppercase);
+            document.getElementById('req-lowercase').classList.toggle('valid', hasLowercase);
+            document.getElementById('req-number').classList.toggle('valid', hasNumber);
+            
+            // Verificar se todos os requisitos estão satisfeitos
+            const allValid = hasLength && hasUppercase && hasLowercase && hasNumber;
+            
+            // Verificar se as senhas coincidem
+            checkPasswordMatch();
+        }
+        
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Verificar requisitos de força da senha
+            const hasLength = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const passwordValid = hasLength && hasUppercase && hasLowercase && hasNumber;
+            
+            // Verificar se as senhas coincidem e se o termo foi aceito
+            const passwordsMatch = password === confirmPassword && confirmPassword !== '';
+            const termsAccepted = document.getElementById('terms').checked;
+            
+            // Habilitar botão apenas se tudo estiver válido
+            document.getElementById('register-button').disabled = !(passwordValid && passwordsMatch && termsAccepted);
+        }
+        
+        // Adicionar listeners para verificação em tempo real
+        document.getElementById('terms').addEventListener('change', checkPasswordMatch);
+    </script>
+</body>
+</html>
