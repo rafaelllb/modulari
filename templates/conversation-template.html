@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulari - Assistente Conversacional</title>
+    <link rel="stylesheet" href="base-styles.css">
+    <style>
+        /* Estilos para o container de seleção de modo */
+        .interaction-choice {
+            margin: var(--spacing-lg) 0;
+            text-align: center;
+        }
+
+        .choice-cards {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .choice-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            width: 300px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .choice-card:hover, .choice-card.highlighted {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .choice-card.highlighted {
+            border: 2px solid var(--primary);
+        }
+
+        .choice-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--primary);
+        }
+
+        /* Estilos para a interface de conversação */
+        .conversation-interface {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--spacing-md);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            min-height: 600px;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .conversation-sidebar {
+            background: var(--surface-alt);
+            padding: var(--spacing-md);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .conversation-main {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .progress-panel, .preferences-panel {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .progress-panel h3, .preferences-panel h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .progress-items {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+        }
+
+        .progress-item.completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .progress-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+            font-weight: 500;
+        }
+
+        .progress-item.pending {
+            color: var(--text-light);
+        }
+
+        #identified-preferences {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+        }
+
+        .preference-tag {
+            background: var(--surface-alt);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .switch-mode {
+            margin-top: auto;
+            padding-top: var(--spacing-md);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            position: relative;
+            word-break: break-word;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: var(--primary-light);
+            color: var(--surface);
+            border-radius: var(--radius-md) var(--radius-md) 0 var(--radius-md);
+        }
+
+        .chat-message.assistant {
+            align-self: flex-start;
+            background: var(--surface-alt);
+            border-radius: var(--radius-md) var(--radius-md) var(--radius-md) 0;
+        }
+
+        .chat-message.thinking {
+            align-self: flex-start;
+            background: rgba(203, 213, 225, 0.3);
+            border-radius: var(--radius-md);
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .user .message-avatar {
+            background: var(--primary);
+            color: var(--surface);
+            right: -10px;
+        }
+
+        .assistant .message-avatar {
+            background: var(--accent);
+            color: var(--primary);
+            left: -10px;
+        }
+
+        .properties-preview {
+            display: flex;
+            gap: var(--spacing-sm);
+            overflow-x: auto;
+            padding: var(--spacing-sm);
+            border-top: 1px solid var(--border);
+            height: 180px;
+        }
+
+        .property-preview-card {
+            flex: 0 0 200px;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .property-preview-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .preview-content {
+            padding: var(--spacing-xs);
+        }
+
+        .preview-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preview-price {
+            font-size: 0.875rem;
+            color: var(--success);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-md);
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        #user-input {
+            flex: 1;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        #user-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26, 54, 93, 0.1);
+        }
+
+        #send-button {
+            min-width: 80px;
+            height: 44px;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-top: 1px solid var(--border);
+        }
+
+        .suggestion-chip {
+            background: var(--surface-alt);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--primary-light);
+            color: var(--surface);
+        }
+
+        @media (max-width: 768px) {
+            .conversation-interface {
+                grid-template-columns: 1fr;
+            }
+            
+            .conversation-sidebar {
+                display: none;
+            }
+            
+            .chat-message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Template do chat que será injetado no container -->
+    <div class="conversation-interface">
+        <div class="conversation-sidebar">
+            <!-- Progresso da conversa -->
+            <div class="progress-panel">
+                <h3>Seu progresso</h3>
+                <div class="progress-items" id="progress-items">
+                    <div class="progress-item completed">
+                        <span>✓</span> Início da conversa
+                    </div>
+                    <div class="progress-item active">
+                        <span>●</span> Entendendo suas necessidades
+                    </div>
+                    <div class="progress-item pending">
+                        <span>○</span> Estilo de vida preferido
+                    </div>
+                    <div class="progress-item pending">
+                        <span>○</span> Prioridades no imóvel
+                    </div>
+                    <div class="progress-item pending">
+                        <span>○</span> Preferências de localização
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumo de preferências identificadas -->
+            <div class="preferences-panel">
+                <h3>Preferências identificadas</h3>
+                <div id="identified-preferences">
+                    <!-- Preferências identificadas serão adicionadas dinamicamente -->
+                    <div class="preference-tag">
+                        <span>🏠</span> Moradia
+                    </div>
+                    <div class="preference-tag">
+                        <span>🌿</span> Ambiente tranquilo
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Opção para mudar para questionário -->
+            <div class="switch-mode">
+                <button class="button button-secondary" onclick="switchToDiscovery()">
+                    Alternar para questionário
+                </button>
+            </div>
+        </div>
+        
+        <div class="conversation-main">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Mensagem inicial do assistente -->
+                <div class="chat-message assistant">
+                    Olá! Sou seu assistente pessoal da Modulari. Estou aqui para ajudar você a encontrar o imóvel ideal. Conte-me um pouco sobre o que você está procurando. Por exemplo: está buscando para morar ou investir?
+                    <div class="message-avatar">M</div>
+                </div>
+            </div>
+            
+            <div class="suggestion-chips">
+                <button class="suggestion-chip" onclick="selectSuggestion('Quero um imóvel para morar')">Quero um imóvel para morar</button>
+                <button class="suggestion-chip" onclick="selectSuggestion('Busco um investimento')">Busco um investimento</button>
+                <button class="suggestion-chip" onclick="selectSuggestion('Gostaria de ver opções na praia')">Opções na praia</button>
+                <button class="suggestion-chip" onclick="selectSuggestion('Prefiro ambiente urbano')">Ambiente urbano</button>
+            </div>
+            
+            <div class="properties-preview" id="properties-preview">
+                <!-- Imóveis recomendados serão mostrados aqui -->
+            </div>
+            
+            <div class="chat-input">
+                <textarea id="user-input" placeholder="Digite sua mensagem..." rows="1"></textarea>
+                <button id="send-button" class="button button-primary">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-resize textarea as user types
+        document.getElementById('user-input').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            // Limit to max-height
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Function to handle suggestion selection
+        function selectSuggestion(suggestion) {
+            document.getElementById('user-input').value = suggestion;
+            // Trigger send button event
+            document.getElementById('send-button').click();
+        }
+
+        // Function to switch to questionnaire
+        function switchToDiscovery() {
+            if (typeof window.switchToDiscovery === 'function') {
+                window.switchToDiscovery();
+            } else {
+                window.location.href = 'discovery.html';
+            }
+        }
+
+        // Add placeholder for the implementation of the property preview
+        function showPropertyPreviews(properties) {
+            const previewContainer = document.getElementById('properties-preview');
+            
+            if (!properties || properties.length === 0) {
+                previewContainer.style.display = 'none';
+                return;
+            }
+            
+            previewContainer.style.display = 'flex';
+            previewContainer.innerHTML = properties.map(property => `
+                <div class="property-preview-card" onclick="viewPropertyDetails(${property.id})">
+                    <img src="${property.image}" alt="${property.title}" class="preview-image">
+                    <div class="preview-content">
+                        <div class="preview-title">${property.title}</div>
+                        <div class="preview-price">${property.price}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Function to view property details
+        function viewPropertyDetails(propertyId) {
+            if (typeof window.viewPropertyDetails === 'function') {
+                window.viewPropertyDetails(propertyId);
+            } else {
+                window.location.href = `property-details.html?id=${propertyId}`;
+            }
+        }
+    </script>
+</body>
+</html>

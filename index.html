@@ -318,6 +318,155 @@
             background: var(--surface-alt);
         }
 
+        /* Estilos para o container de seleção de modo */
+        .interaction-choice {
+            margin: var(--spacing-lg) 0;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .choice-cards {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .choice-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            width: 300px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .choice-card:hover, .choice-card.highlighted {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .choice-card.highlighted {
+            border: 2px solid var(--primary);
+        }
+
+        .choice-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--primary);
+        }
+
+        /* Estilos para a interface de conversação */
+        .interaction-container {
+            margin: var(--spacing-lg) 0;
+        }
+
+        .conversation-interface {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--spacing-md);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .conversation-sidebar {
+            background: var(--surface-alt);
+            padding: var(--spacing-md);
+            border-right: 1px solid var(--border);
+        }
+
+        .conversation-main {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-md);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-md);
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+
+        .chat-message {
+            margin-bottom: var(--spacing-md);
+            max-width: 80%;
+        }
+
+        .chat-message.user {
+            margin-left: auto;
+            background: var(--primary-light);
+            color: var(--surface);
+            border-radius: var(--radius-md) var(--radius-md) 0 var(--radius-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+        }
+
+        .chat-message.assistant {
+            margin-right: auto;
+            background: var(--surface-alt);
+            border-radius: var(--radius-md) var(--radius-md) var(--radius-md) 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+        }
+
+        .properties-preview {
+            display: flex;
+            gap: var(--spacing-sm);
+            overflow-x: auto;
+            padding: var(--spacing-sm);
+            border-top: 1px solid var(--border);
+        }
+
+        .progress-panel {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .progress-panel h3, 
+        .preferences-panel h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .progress-items {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .preferences-panel {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .switch-mode {
+            margin-top: var(--spacing-md);
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             .profiles-button {
                 padding: 8px 12px;
@@ -335,6 +484,19 @@
 
             .lifestyle-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .conversation-interface {
+                grid-template-columns: 1fr;
+            }
+            
+            .conversation-sidebar {
+                display: none;
+            }
+
+            .choice-cards {
+                flex-direction: column;
+                align-items: center;
             }
         }
 
@@ -374,12 +536,34 @@
             </div>
             <div class="cta-section">
                 <h3 class="cta-title">Como você imagina seu espaço ideal?</h3>
-                <p>Selecione o estilo que mais combina com você</p>
+                <p>Explore nosso sistema para encontrar seu imóvel ideal</p>
             </div>
         </section>
 
-        <div class="lifestyle-grid" id="lifestyle-grid">
-            <!-- Cards will be loaded dynamically -->
+        <!-- Nova seção para escolha do modo de interação -->
+        <div class="interaction-choice">
+            <h3 class="section-title">Como você prefere encontrar seu imóvel ideal?</h3>
+            
+            <div class="choice-cards">
+                <div class="choice-card" id="discovery-option" onclick="selectInteractionMode('discovery')">
+                    <div class="choice-icon">📋</div>
+                    <h4>Questionário Guiado</h4>
+                    <p>Responda a perguntas específicas para encontrar seu imóvel ideal rapidamente.</p>
+                    <button class="button button-primary">Começar Questionário</button>
+                </div>
+                
+                <div class="choice-card highlighted" id="conversation-option" onclick="selectInteractionMode('conversation')">
+                    <div class="choice-icon">💬</div>
+                    <h4>Converse com Nosso Assistente</h4>
+                    <p>Deixe nosso assistente inteligente entender suas necessidades através de uma conversa natural.</p>
+                    <button class="button button-primary">Iniciar Conversa</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container de interação dinâmico -->
+        <div id="interaction-container" class="interaction-container">
+            <!-- O conteúdo será carregado dinamicamente baseado na escolha -->
         </div>
 
         <div class="benefits-grid">
@@ -424,180 +608,6 @@
         </div>
     </footer>
 
-    <script type="module">
-        import dataService from './data-service.js';
-        import permissionService from './permission-service.js';
-        import toastService from './toast-service.js';
-        import { renderHeader } from './header-component.js';
-
-        // Export function to global scope
-        window.selectLifestyle = function(lifestyle) {
-            dataService.saveSelectedLifestyle(lifestyle);
-            window.location.href = 'discovery.html';
-        };
-
-        // Funções que precisam estar no escopo global
-        window.showLoadingLifestyles = function() {
-            const lifestyleGrid = document.getElementById('lifestyle-grid');
-            lifestyleGrid.innerHTML = Array(3).fill().map(() => `
-                <div class="lifestyle-card loading"></div>
-            `).join('');
-        }
-
-        window.renderLifestyleOptions = function() {
-            const lifestyleGrid = document.getElementById('lifestyle-grid');
-            
-            const lifestyles = [
-                {
-                    id: 'beach',
-                    title: 'Vida Litorânea',
-                    icon: '🌊',
-                    description: 'Desperte com a brisa do mar e viva momentos de tranquilidade à beira-mar.',
-                    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80'
-                },
-                {
-                    id: 'city',
-                    title: 'Centro Urbano',
-                    icon: '🌆',
-                    description: 'Conectado com a energia da cidade e todas as facilidades urbanas.',
-                    image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80'
-                },
-                {
-                    id: 'countryside',
-                    title: 'Refúgio Natural',
-                    icon: '🌳',
-                    description: 'Encontre paz e qualidade de vida em meio à natureza.',
-                    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80'
-                }
-            ];
-            
-            lifestyleGrid.innerHTML = lifestyles.map(lifestyle => `
-                <div class="lifestyle-card" onclick="selectLifestyle('${lifestyle.id}')">
-                    <img src="${lifestyle.image}" alt="${lifestyle.title}" class="lifestyle-image">
-                    <div class="lifestyle-content">
-                        <h3 class="lifestyle-title">
-                            <span>${lifestyle.icon}</span>
-                            ${lifestyle.title}
-                        </h3>
-                        <p class="lifestyle-description">${lifestyle.description}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-        document.addEventListener('DOMContentLoaded', async function() {
-            try {
-                // Renderizar o cabeçalho
-                renderHeader('header-content');
-                
-                // Mostrar estado de carregamento
-                showLoadingLifestyles();
-                
-                // Verificar autenticação e atualizar UI
-                if (permissionService.isAuthenticated()) {
-                    updateUIForAuthenticatedUser();
-                    
-                    if (permissionService.needsTokenRefresh()) {
-                        await permissionService.refreshToken();
-                    }
-                }
-                
-                // Make sure the profilesButton exists before we try to use it
-                const profilesButton = document.getElementById('profilesButton');
-                if (profilesButton) {
-                    // Verificar perfis salvos
-                    checkSavedProfiles();
-                } else {
-                    console.warn('profilesButton element not found, skipping profile check');
-                }
-                
-                // Simular atraso da API
-                await new Promise(resolve => setTimeout(resolve, 600));
-                
-                // Renderizar cards de lifestyle
-                renderLifestyleOptions();
-                
-            } catch (error) {
-                console.error('Erro ao inicializar aplicação:', error);
-                const lifestyleGrid = document.getElementById('lifestyle-grid');
-                if (lifestyleGrid) {
-                    lifestyleGrid.innerHTML = 
-                        '<div class="error-state">Erro ao carregar estilos de vida</div>';
-                }
-                toastService.error('Erro ao inicializar a aplicação');
-            }
-        });
-
-        // Função para verificar perfis salvos
-        function checkSavedProfiles() {
-            const profilesButton = document.getElementById('profilesButton');
-            
-            // Add null check before accessing classList
-            if (profilesButton) {
-                const profiles = dataService.getBuyerProfiles();
-                
-                if (profiles.length > 0) {
-                    profilesButton.classList.add('visible');
-                } else {
-                    profilesButton.classList.remove('visible');
-                }
-            } else {
-                console.warn('profilesButton element not found');
-            }
-        }
-
-        // Função para atualizar UI para usuários autenticados
-        function updateUIForAuthenticatedUser() {
-            const user = permissionService.getCurrentUser();
-            if (!user) return;
-            
-            // Atualizar cabeçalho para mostrar informações do usuário
-            const headerContent = document.querySelector('.header-content');
-            
-            // Verificar se o menu do usuário já existe para evitar duplicação
-            if (!document.getElementById('user-menu')) {
-                const profilesButton = document.getElementById('profilesButton');
-                if (profilesButton) {
-                    profilesButton.remove();
-                }
-                
-                const userMenuHtml = `
-                    <div class="user-menu" id="user-menu">
-                        <button class="user-button">
-                            <span class="user-avatar">${user.name ? user.name.charAt(0) : 'U'}</span>
-                            <span class="user-name">${user.name || 'Usuário'}</span>
-                        </button>
-                        <div class="user-dropdown">
-                            <a href="profile.html">Meu Perfil</a>
-                            <a href="profiles.html">Meus Perfis de Busca</a>
-                            <a href="matches.html">Meus Matches</a>
-                            ${permissionService.hasRole('admin') ? '<a href="admin/dashboard.html">Administração</a>' : ''}
-                            <a href="#" id="logout-button">Sair</a>
-                        </div>
-                    </div>
-                `;
-                
-                headerContent.insertAdjacentHTML('beforeend', userMenuHtml);
-                
-                // Adicionar event listener para botão de logout
-                document.getElementById('logout-button').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    permissionService.logout();
-                });
-                
-                // Toggle dropdown
-                document.querySelector('.user-button').addEventListener('click', () => {
-                    document.querySelector('.user-dropdown').classList.toggle('active');
-                });
-                
-                // Fechar dropdown ao clicar fora
-                document.addEventListener('click', (e) => {
-                    const userMenu = document.getElementById('user-menu');
-                    if (userMenu && !userMenu.contains(e.target)) {
-                        document.querySelector('.user-dropdown').classList.remove('active');
-                    }
-                });
-            }
-        }
-    </script>
+    <script type="module" src="index.js"></script>
 </body>
 </html>
