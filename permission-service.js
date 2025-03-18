@@ -211,7 +211,8 @@ class PermissionService {
     }
     
     // Redirecionar para login
-    window.location.href = 'login.html';
+    const isInSubdirectory = window.location.pathname.includes('/admin/');
+    window.location.href = isInSubdirectory ? '../login.html' : 'login.html';
   }
 
   /**

@@ -63,6 +63,12 @@ body {
     align-items: center;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
 .logo {
     font-size: 1.5rem;
     font-weight: 700;

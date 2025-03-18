@@ -163,19 +163,20 @@
         <!-- Demo credentials notification -->
         <div class="demo-credentials" style="background: rgba(59, 130, 246, 0.1); color: #3B82F6; padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: left; font-size: 0.9rem;">
             <strong>Credenciais de demonstração:</strong><br>
-            Email: demo@exemplo.com<br>
-            Senha: senha123
+            <b>Cliente:</b> cliente@exemplo.com / cliente123<br>
+            <b>Corretor:</b> corretor@exemplo.com / corretor123<br>
+            <b>Admin:</b> admin@exemplo.com / admin123
         </div>
         
         <form class="auth-form" id="login-form">
             <div class="form-group">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" id="email" name="email" class="form-input" required value="demo@exemplo.com">
+                <input type="email" id="email" name="email" class="form-input" required value="cliente@exemplo.com">
             </div>
             
             <div class="form-group">
                 <label for="password" class="form-label">Senha</label>
-                <input type="password" id="password" name="password" class="form-input" required value="senha123">
+                <input type="password" id="password" name="password" class="form-input" required value="cliente123">
                 <div class="remember-me">
                     <input type="checkbox" id="remember" name="remember">
                     <label for="remember">Lembrar de mim</label>
@@ -216,32 +217,64 @@
             authenticateUser(email, password, remember);
         });
         
+    
         function authenticateUser(email, password, remember) {
-            // TEMPORÁRIO: Para demonstração, vamos simular um login bem-sucedido
-            // Em produção, este código seria removido
-            if (email === 'demo@exemplo.com' && password === 'senha123') {
-                const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlVzdcOhcmlvIERlbW8iLCJyb2xlIjoidXNlciIsImlhdCI6MTUxNjIzOTAyMn0';
+            // Credenciais de demonstração para diferentes tipos de usuários
+            const demoCredentials = {
+                'cliente@exemplo.com': {
+                    password: 'cliente123',
+                    role: 'user',
+                    name: 'Cliente Demo',
+                    redirect: 'property-cards.html'
+                },
+                'corretor@exemplo.com': {
+                    password: 'corretor123',
+                    role: 'agent',
+                    name: 'Corretor Demo',
+                    redirect: 'properties.html'
+                },
+                'admin@exemplo.com': {
+                    password: 'admin123',
+                    role: 'admin',
+                    name: 'Admin Demo',
+                    redirect: 'dashboard.html'
+                }
+            };
+
+            // Verificar credenciais com usuários de demonstração
+            const userInfo = demoCredentials[email];
+            if (userInfo && userInfo.password === password) {
+                // Criar token JWT mock com a role correta
+                const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IiR7dXNlckluZm8ubmFtZX0iLCJyb2xlIjoiJHt1c2VySW5mby5yb2xlfSIsImlhdCI6MTUxNjIzOTAyMn0`;
                 localStorage.setItem('authToken', mockToken);
                 localStorage.setItem('userId', '123456');
                 
-                // Check if there's a pending profile from session storage
+                // Armazenar dados do usuário
+                const userData = {
+                    name: userInfo.name,
+                    email: email,
+                    role: userInfo.role
+                };
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Verificar se há um perfil pendente no sessionStorage
                 const pendingProfile = sessionStorage.getItem('pendingProfile');
                 if (pendingProfile) {
                     const profileData = JSON.parse(pendingProfile);
                     
-                    // Move profile data from session to localStorage
+                    // Mover dados do perfil para localStorage
                     const dataService = window.dataService || {};
                     if (dataService.createSearchProfile) {
                         const newProfile = dataService.createSearchProfile(profileData);
                         dataService.setActiveProfile(newProfile.id);
                     }
                     
-                    // Clear session storage
+                    // Limpar sessionStorage
                     sessionStorage.removeItem('pendingProfile');
                 }
                 
-                // Check for redirect preference
-                const redirect = sessionStorage.getItem('redirectAfterAuth') || 'index.html';
+                // Definir redirecionamento com base no tipo de usuário
+                const redirect = sessionStorage.getItem('redirectAfterAuth') || userInfo.redirect;
                 sessionStorage.removeItem('redirectAfterAuth');
                 
                 window.location.href = redirect;

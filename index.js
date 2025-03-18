@@ -435,7 +435,7 @@ function updateUIForAuthenticatedUser() {
                     <a href="profile.html">Meu Perfil</a>
                     <a href="profiles.html">Meus Perfis de Busca</a>
                     <a href="matches.html">Meus Matches</a>
-                    ${permissionService.hasRole('admin') ? '<a href="admin/dashboard.html">Administração</a>' : ''}
+                    ${permissionService.hasRole('admin') ? '<a href="dashboard.html">Administração</a>' : ''}
                     <a href="#" id="logout-button">Sair</a>
                 </div>
             </div>
