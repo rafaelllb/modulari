@@ -617,3 +617,5 @@ function showToast(message, type = 'info') {
 
 // Exportar função para mostrar toast no escopo global
 window.showToast = showToast;
+// Exportar função para mostrar switchView no escopo global
+window.switchView = switchView;
