@@ -3,7 +3,7 @@
  * Melhora a experiência de navegação e integração com o serviço de dados
  */
 import dataService from './data-service.js';
-import permissionService from './permission-service.js';
+import permissionService from './services/permission-service.js';
 
 // Estado da aplicação
 let currentIndex = 0;
