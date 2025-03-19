@@ -4,7 +4,7 @@
  * and the dynamic loading of either the questionnaire or conversation interface
  */
 import dataService from './data-service.js';
-import permissionService from './service/permission-service.js';
+import permissionService from './services/permission-service.js';
 import toastService from './toast-service.js';
 import { renderHeader } from './header-component.js';
 
