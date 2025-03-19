@@ -738,7 +738,7 @@
     </div>
 
     <script type="module">
-        import permissionService from '../permission-service.js';
+        import permissionService from '../services/permission-service.js';
 
         // Verificar se o usuário é administrador
         document.addEventListener('DOMContentLoaded', function() {
@@ -748,7 +748,7 @@
             }
             
             if (!permissionService.hasRole(['admin', 'agent'])) {
-                window.location.href = '../index.html';
+                window.location.href = 'index.html';
                 return;
             }
             

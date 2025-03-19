@@ -245,8 +245,25 @@
             const userInfo = demoCredentials[email];
             if (userInfo && userInfo.password === password) {
                 // Criar token JWT mock com a role correta
-                const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IiR7dXNlckluZm8ubmFtZX0iLCJyb2xlIjoiJHt1c2VySW5mby5yb2xlfSIsImlhdCI6MTUxNjIzOTAyMn0`;
+                // Criar token JWT mock com a role correta
+                // Criar payload para o token JWT
+                const payload = {
+                    sub: "1234567890",
+                    name: userInfo.name,
+                    role: userInfo.role,
+                    iat: 1516239022
+                };
+
+                // Convertendo para Base64Url (simplificado, sem assinatura)
+                const base64Header = btoa(JSON.stringify({alg: "HS256", typ: "JWT"}));
+                const base64Payload = btoa(JSON.stringify(payload));
+                const mockToken = `${base64Header}.${base64Payload}.mockSignature`;
+
                 localStorage.setItem('authToken', mockToken);
+
+                const expirationTime = new Date().getTime() + 3600 * 1000; // 1 hora a partir de agora
+                localStorage.setItem('tokenExpiration', expirationTime.toString());
+
                 localStorage.setItem('userId', '123456');
                 
                 // Armazenar dados do usuário
