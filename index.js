@@ -51,6 +51,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Render lifestyle options for the questionnaire mode
         renderLifestyleOptions();
+
+        document.getElementById('discovery-option').addEventListener('click', function() {
+            selectInteractionMode('discovery');
+        });
+        
+        document.getElementById('conversation-option').addEventListener('click', function() {
+            selectInteractionMode('conversation');
+        });
         
     } catch (error) {
         console.error('Erro ao inicializar aplicação:', error);
